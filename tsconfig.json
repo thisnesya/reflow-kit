@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "useDefineForClassFields": true,
+        "module": "ESNext",
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "skipLibCheck": true,
+
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "moduleDetection": "force",
+        "noEmit": true,
+
+        /* Linting */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "erasableSyntaxOnly": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedSideEffectImports": true,
+
+        "baseUrl": "./",
+        "outDir": "'dist",
+        "types": ["./src/app.d.ts", "jquery"],
+        "paths": {
+            "@app/core": ["src/core"],
+            "@app/types": ["src/types"],
+            "@app/shared/*": ["src/shared/*"],
+            "@app/shared": ["src/shared"],
+            "@app/constants": ["src/shared/constants"],
+            "@app/features": ["src/features"],
+            "@app/helpers": ["src/helpers"]
+        }
+    },
+    "include": ["src"]
+}
