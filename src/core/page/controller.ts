@@ -1,5 +1,6 @@
 export function PageLifecycle({
     onInit,
+    leavePageCondition,
     utilities = {}
 }: PageLifecycleOptions): PageLifecycleMethods {
     const domListeners: EventListener[] = [];
@@ -83,7 +84,7 @@ export function PageLifecycle({
         const dest = new URL(target.href);
         const samePage = dest.pathname === new URL(location.href).pathname;
 
-        if (href?.startsWith("/") && !samePage) {
+        if (leavePageCondition?.() || (href?.startsWith("/") && !samePage)) {
             e.preventDefault();
             await triggerEvent("page:leave");
 
@@ -116,6 +117,7 @@ type EventsMap = {
 
 export interface PageLifecycleOptions {
     onInit?: () => void;
+    leavePageCondition?: () => boolean;
     utilities?: Utils;
 }
 
