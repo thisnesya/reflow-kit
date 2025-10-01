@@ -82,7 +82,7 @@ export function PageLifecycle({
         const href = target.getAttribute("href");
         const samePage = new URL(target.href).pathname === new URL(location.href).pathname;
 
-        if (href?.startsWith("/") && samePage) {
+        if (href?.startsWith("/") && !samePage) {
             e.preventDefault();
             await triggerEvent("page:leave");
 
