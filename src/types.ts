@@ -1,11 +1,11 @@
 import type {
     DeviceDetectorOptions,
-    PageLifecycleOptions,
+    PageLifecycleBaseOptions,
     ScrollControllerOptions
 } from "@app/core";
 
 export interface AppConfig {
     scroll?: ScrollControllerOptions;
-    page?: PageLifecycleOptions;
+    page?: PageLifecycleBaseOptions;
     devices?: DeviceDetectorOptions;
 }

@@ -1,17 +1,18 @@
-export function PageLifecycle({
+export function PageLifecycle<TUtilities = Record<string, unknown>>({
     onInit,
     leavePageCondition,
-    utilities = {}
-}: PageLifecycleOptions): PageLifecycleMethods {
-    const domListeners: EventListener[] = [];
-    const eventListeners: Record<keyof EventsMap, EventListener> = {
-        "page:before": () => {},
-        "page:fontready": () => {},
-        "page:domready": () => {},
-        "page:ready": () => {},
-        "page:restore": () => {},
-        "page:leave": () => {},
-        "page:load": () => {}
+    utilities = {} as TUtilities
+}: PageLifecycleOptions<TUtilities>): PageLifecycleMethods<TUtilities> {
+    const domListeners: EventListener<TUtilities>[] = [];
+    const noop: EventListener<TUtilities> = () => {};
+    const eventListeners: EventsMap<TUtilities> = {
+        "page:before": noop,
+        "page:fontready": noop,
+        "page:domready": noop,
+        "page:ready": noop,
+        "page:restore": noop,
+        "page:leave": noop,
+        "page:load": noop
     };
 
     const domReady = new Promise<void>(resolve => {
@@ -45,7 +46,11 @@ export function PageLifecycle({
     });
 
     return {
-        on(event: keyof EventsMap, cb: EventListener, options?: { name?: string }) {
+        on<E extends keyof EventsMap<TUtilities>>(
+            event: E,
+            cb: EventsMap<TUtilities>[E],
+            options?: { name?: string }
+        ) {
             switch (event) {
                 case "page:domready":
                     domListeners.push(cb);
@@ -62,14 +67,14 @@ export function PageLifecycle({
         }
     };
 
-    function listenFontLoad(name: string, cb: EventListener) {
+    function listenFontLoad(name: string, cb: EventListener<TUtilities>) {
         Array.from(document.fonts)
             .find(f => f.family === name)
-            ?.loaded.then(cb);
+            ?.loaded.then(() => cb(utilities));
     }
 
-    async function triggerEvent(event: keyof EventsMap) {
-        if (event === "page:domready" || !eventListeners[event]) return;
+    async function triggerEvent(event: keyof EventsMap<TUtilities>) {
+        if (event === "page:domready") return;
         await eventListeners[event](utilities);
     }
 
@@ -95,30 +100,34 @@ export function PageLifecycle({
     }
 }
 
-export interface PageLifecycleMethods {
-    on: <E extends keyof EventsMap>(
+export interface PageLifecycleMethods<TUtilities = Record<string, unknown>> {
+    on<E extends keyof EventsMap<TUtilities>>(
         event: E,
-        callback: EventsMap[E],
+        callback: EventsMap<TUtilities>[E],
         options?: { name?: string }
-    ) => void;
+    ): void;
 }
 
-type EventListener = (tools?: Utils) => void | Promise<void>;
+type EventListener<TUtilities = Record<string, unknown>> = (
+    tools: TUtilities
+) => void | Promise<void>;
 
-type EventsMap = {
-    "page:before": EventListener;
-    "page:fontready": EventListener;
-    "page:domready": EventListener;
-    "page:ready": EventListener;
-    "page:restore": EventListener;
-    "page:leave": EventListener;
-    "page:load": EventListener;
+type EventsMap<TUtilities = Record<string, unknown>> = {
+    "page:before": EventListener<TUtilities>;
+    "page:fontready": EventListener<TUtilities>;
+    "page:domready": EventListener<TUtilities>;
+    "page:ready": EventListener<TUtilities>;
+    "page:restore": EventListener<TUtilities>;
+    "page:leave": EventListener<TUtilities>;
+    "page:load": EventListener<TUtilities>;
 };
 
-export interface PageLifecycleOptions {
-    onInit?: () => void;
-    leavePageCondition?: () => boolean;
-    utilities?: Utils;
+export interface PageLifecycleOptions<TUtilities = Record<string, unknown>>
+    extends PageLifecycleBaseOptions {
+    utilities?: TUtilities;
 }
 
-type Utils = Record<string, any>;
+export interface PageLifecycleBaseOptions {
+    onInit?: () => void;
+    leavePageCondition?: () => boolean;
+}

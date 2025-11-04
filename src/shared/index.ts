@@ -1,5 +1,14 @@
 import { getFormData } from "@app/features";
-import { debounce, getQueryParam, getQueryParams, nthElement, sleep, toArray } from "./utils";
+import {
+    debounce,
+    getQueryParam,
+    getQueryParams,
+    nthElement,
+    sleep,
+    toArray,
+    getEven,
+    getOdd
+} from "./utils";
 import {
     getAttribute,
     getTemplate,
@@ -23,6 +32,8 @@ const utils = {
     toArray,
     debounce,
     nthElement,
+    getEven,
+    getOdd,
 
     hideElement,
     showElement,

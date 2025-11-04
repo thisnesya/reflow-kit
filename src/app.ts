@@ -44,3 +44,4 @@ function init(options: AppConfig = {}) {
 }
 
 window.ReflowKit = { init };
+export { init };
