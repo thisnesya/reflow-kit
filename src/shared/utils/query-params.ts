@@ -18,6 +18,17 @@ export function getQueryParams(url?: string) {
     return res;
 }
 
+export function getUtmQueries() {
+    return {
+        source: getQueryParam("utm_source"),
+        medium: getQueryParam("utm_medium"),
+        campaign: getQueryParam("utm_campaign"),
+        term: getQueryParam("utm_term"),
+        content: getQueryParam("utm_content"),
+        id: getQueryParam("utm_id")
+    };
+}
+
 type Params = {
     [key: string]: string;
 };
