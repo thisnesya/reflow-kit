@@ -1,5 +1,5 @@
 export function selectInput() {
-    function build(node: HTMLElement) {
+    function build(node: HTMLElement, onChange?: (input: HTMLInputElement) => void) {
         const seleted = node.querySelector("[data-value]");
         const toggle = node.querySelector("[data-toggle]");
 
@@ -16,6 +16,8 @@ export function selectInput() {
                     toggle.classList.add("is-selected", "is-valid");
                     toggle.classList.remove("is-invalid");
                 }
+
+                onChange?.(input);
             });
         });
 
