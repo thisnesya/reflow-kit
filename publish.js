@@ -2,16 +2,21 @@
 
 import { execSync } from "child_process";
 
-// Получаем тег из аргументов
-const tagArg = process.argv.find(arg => arg.startsWith("--tag="));
-const tag = tagArg ? tagArg.split("=")[1] : process.env.npm_config_tag;
+// Получаем тег из аргументов (первый аргумент после имени скрипта)
+const tag = process.argv[2];
 
 if (!tag) {
-    console.error("❌ Please specify tag: pnpm publish --tag v1.0.5");
+    console.error("❌ Please specify tag: pnpm release v1.0.5");
+    console.error("   or: npm run release -- v1.0.5");
     process.exit(1);
 }
 
-console.log(`🚀 Starting publish process for tag: ${tag}`);
+// Проверяем формат тега (опционально)
+if (!tag.startsWith("v")) {
+    console.warn('⚠️  Warning: tag should start with "v" (e.g., v1.0.5)');
+}
+
+console.log(`🚀 Starting release process for tag: ${tag}`);
 
 try {
     // 1. Сборка
@@ -21,7 +26,13 @@ try {
     // 2. Коммит и пуш изменений
     console.log("📝 Committing changes...");
     execSync("git add .", { stdio: "inherit" });
-    execSync(`git commit -m "${tag}"`, { stdio: "inherit" });
+
+    try {
+        execSync(`git commit -m "${tag}"`, { stdio: "inherit" });
+    } catch (e) {
+        console.log("📝 No changes to commit or commit failed, continuing...");
+    }
+
     execSync("git push", { stdio: "inherit" });
 
     // 3. Создание и пуш тега
@@ -33,8 +44,8 @@ try {
     console.log(`🎉 Creating release ${tag}...`);
     execSync(`gh release create "${tag}" --generate-notes --title "${tag}"`, { stdio: "inherit" });
 
-    console.log("✅ Publish completed successfully!");
+    console.log("✅ Release completed successfully!");
 } catch (error) {
-    console.error("❌ Publish failed:", error.message);
+    console.error("❌ Release failed:", error.message);
     process.exit(1);
 }
