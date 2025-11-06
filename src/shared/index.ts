@@ -18,7 +18,7 @@ import {
     showElement,
     toggleElement
 } from "./dom";
-import { restartWebflow } from "./webflow";
+import { restartWebflow, webflowReady } from "./webflow";
 
 const utils = {
     getFormData,
@@ -40,7 +40,8 @@ const utils = {
     toggleElement,
     getAttribute,
 
-    restartWebflow
+    restartWebflow,
+    webflowReady
 };
 
 export { utils };
