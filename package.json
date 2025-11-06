@@ -8,7 +8,7 @@
     "scripts": {
         "build": "node esbuild.config.js",
         "dev": "esbuild src/app.ts --bundle --outfile=dist/app.js --watch --sourcemap",
-        "publish": "node publish.js"
+        "release": "node publish.js"
     },
     "keywords": [],
     "author": "",

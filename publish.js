@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require("child_process");
+import { execSync } from "child_process";
 
 // Получаем тег из аргументов
 const tagArg = process.argv.find(arg => arg.startsWith("--tag="));
