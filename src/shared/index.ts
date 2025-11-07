@@ -6,9 +6,7 @@ import {
     getUtmQueries,
     nthElement,
     sleep,
-    toArray,
-    getEven,
-    getOdd
+    toArray
 } from "./utils";
 import {
     getAttribute,
@@ -34,8 +32,6 @@ const utils = {
     toArray,
     debounce,
     nthElement,
-    getEven,
-    getOdd,
 
     hideElement,
     showElement,

@@ -1,6 +1,6 @@
 {
     "name": "@reflow/kit",
-    "version": "0.2.6",
+    "version": "1.0.7",
     "description": "",
     "main": "dist/reflow.kit.min.js",
     "unpkg": "dist/reflow.kit.min.js",
