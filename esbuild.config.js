@@ -7,7 +7,7 @@ esbuild
         outfile: "dist/reflow.kit.min.js",
         platform: "browser",
         target: ["es2018"],
-        sourcemap: true,
+        sourcemap: false,
         minify: true
     })
     .catch(() => process.exit(1));

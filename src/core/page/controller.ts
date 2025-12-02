@@ -82,7 +82,7 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         if (!e.isTrusted) return;
         const target = (e.target as HTMLElement).closest("a");
 
-        if (!target) return;
+        if (!target || !target.href) return;
         if (e.button === 1 || e.ctrlKey || e.metaKey) return;
 
         const href = target.getAttribute("href");

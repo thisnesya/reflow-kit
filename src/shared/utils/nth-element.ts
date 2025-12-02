@@ -1,4 +1,4 @@
-export function nthElement(arr: Array<any> = [], every: number = 1, from: number = 0) {
+export function nthElement(arr: Array<any> = [], every: number = 1, from: number = 1) {
     const result = [];
 
     for (let i = from - 1; i < arr.length; i += every) {
