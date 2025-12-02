@@ -69,11 +69,32 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
             await triggerEvent("page:before");
 
             const listeners = domListeners.filter(l => (scope ? l.scope === scope : true));
-            await Promise.all(listeners.map(({ cb }) => cb(utilities)));
+            await Promise.all(listeners.map(runDomListener));
 
             await triggerEvent("page:ready");
+        },
+        async cleanup(scope?: string) {
+            const listeners = domListeners.filter(l => (scope ? l.scope === scope : true));
+
+            const cleanups = listeners
+                .map(l => l.cleanup)
+                .filter((fn): fn is CleanupFn => typeof fn === "function");
+
+            await Promise.allSettled(cleanups.map(fn => fn()));
+
+            listeners.forEach(l => {
+                l.cleanup = undefined;
+            });
         }
     };
+
+    async function runDomListener(listener: DomListener<TUtilities>) {
+        const result = await listener.cb(utilities);
+
+        if (typeof result === "function") {
+            listener.cleanup = result as CleanupFn;
+        }
+    }
 
     function listenFontLoad(name: string, cb: EventListener<TUtilities>) {
         Array.from(document.fonts)
@@ -87,7 +108,7 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
     }
 
     async function handleClick(e: MouseEvent) {
-        if (!e.isTrusted) return;
+        if (!e.isTrusted || e.defaultPrevented) return;
         const target = (e.target as HTMLElement).closest("a");
 
         if (!target || !target.href) return;
@@ -115,16 +136,20 @@ export interface PageLifecycleMethods<TUtilities = Record<string, unknown>> {
         options?: { name?: string; scope?: string }
     ): void;
     reInit(scope?: string): Promise<void>;
+    cleanup(scope?: string): Promise<void>;
 }
 
 type EventListener<TUtilities = Record<string, unknown>> = (
     tools: TUtilities
-) => void | Promise<void>;
+) => void | CleanupFn | Promise<void | CleanupFn>;
 
 type DomListener<TUtilities> = {
     cb: EventListener<TUtilities>;
     scope?: string;
+    cleanup?: CleanupFn;
 };
+
+type CleanupFn = () => void | Promise<void>;
 
 type EventsMap<TUtilities = Record<string, unknown>> = {
     "page:before": EventListener<TUtilities>;

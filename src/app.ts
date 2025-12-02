@@ -27,11 +27,12 @@ function init(options: AppConfig = {}) {
         // phoneInput: phoneInput()
     };
 
-    const { on, reInit } = PageLifecycle({ ...(options.page || {}), utilities });
+    const { on, reInit, cleanup } = PageLifecycle({ ...(options.page || {}), utilities });
 
     const instance = {
         on,
         reInit,
+        cleanup,
         utils: utilities,
         scroll,
         components,
