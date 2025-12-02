@@ -3,7 +3,7 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
     leavePageCondition,
     utilities = {} as TUtilities
 }: PageLifecycleOptions<TUtilities>): PageLifecycleMethods<TUtilities> {
-    const domListeners: EventListener<TUtilities>[] = [];
+    const domListeners: DomListener<TUtilities>[] = [];
     const noop: EventListener<TUtilities> = () => {};
     const eventListeners: EventsMap<TUtilities> = {
         "page:before": noop,
@@ -30,7 +30,7 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         domReady.then(async () => {
             await document.fonts.ready;
             await triggerEvent("page:before");
-            await Promise.all(domListeners.map(cb => cb(utilities)));
+            await Promise.all(domListeners.map(({ cb }) => cb(utilities)));
         });
 
         await document.fonts.ready;
@@ -49,11 +49,11 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         on<E extends keyof EventsMap<TUtilities>>(
             event: E,
             cb: EventsMap<TUtilities>[E],
-            options?: { name?: string }
+            options?: { name?: string; scope?: string }
         ) {
             switch (event) {
                 case "page:domready":
-                    domListeners.push(cb);
+                    domListeners.push({ cb, scope: options?.scope });
 
                     break;
                 case "page:fontready":
@@ -64,6 +64,14 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
                 default:
                     eventListeners[event] = cb;
             }
+        },
+        async reInit(scope?: string) {
+            await triggerEvent("page:before");
+
+            const listeners = domListeners.filter(l => (scope ? l.scope === scope : true));
+            await Promise.all(listeners.map(({ cb }) => cb(utilities)));
+
+            await triggerEvent("page:ready");
         }
     };
 
@@ -104,13 +112,19 @@ export interface PageLifecycleMethods<TUtilities = Record<string, unknown>> {
     on<E extends keyof EventsMap<TUtilities>>(
         event: E,
         callback: EventsMap<TUtilities>[E],
-        options?: { name?: string }
+        options?: { name?: string; scope?: string }
     ): void;
+    reInit(scope?: string): Promise<void>;
 }
 
 type EventListener<TUtilities = Record<string, unknown>> = (
     tools: TUtilities
 ) => void | Promise<void>;
+
+type DomListener<TUtilities> = {
+    cb: EventListener<TUtilities>;
+    scope?: string;
+};
 
 type EventsMap<TUtilities = Record<string, unknown>> = {
     "page:before": EventListener<TUtilities>;
