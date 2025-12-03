@@ -12,7 +12,7 @@ function init(options: AppConfig = {}) {
     const scroll = ScrollController({ ...options.scroll });
     const modal = modalBuilder(scroll);
 
-    const utilities = {
+    const utilities: Record<string, unknown> = {
         ...utils,
         isMobile,
         isTablet,
@@ -29,10 +29,15 @@ function init(options: AppConfig = {}) {
 
     const { on, reInit, cleanup } = PageLifecycle({ ...(options.page || {}), utilities });
 
+    function registerUtility(name: string, value: unknown) {
+        utilities[name] = value;
+    }
+
     const instance = {
         on,
         reInit,
         cleanup,
+        registerUtility,
         utils: utilities,
         scroll,
         components,
