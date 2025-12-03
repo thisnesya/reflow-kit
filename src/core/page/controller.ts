@@ -1,6 +1,6 @@
 export function PageLifecycle<TUtilities = Record<string, unknown>>({
     onInit,
-    onLeavePage,
+    triggerPageLeave = true,
     utilities = {} as TUtilities
 }: PageLifecycleOptions<TUtilities>): PageLifecycleMethods<TUtilities> {
     const domListeners: DomListener<TUtilities>[] = [];
@@ -40,7 +40,7 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         console.log("page:%c ready", "color:green;");
     }
 
-    if (!onLeavePage?.disable) document.addEventListener("click", handleClick);
+    if (triggerPageLeave) document.addEventListener("click", handleClick);
 
     window.addEventListener("pageshow", ({ persisted }) => {
         if (persisted) triggerEvent("page:restore");
@@ -119,7 +119,10 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         const dest = new URL(target.href);
         const samePage = dest.pathname === new URL(location.href).pathname;
 
-        if (onLeavePage?.condition?.() || (href?.startsWith("/") && !samePage)) {
+        if (
+            (typeof triggerPageLeave !== "boolean" && triggerPageLeave?.condition?.()) ||
+            (href?.startsWith("/") && !samePage)
+        ) {
             e.preventDefault();
             await triggerEvent("page:leave");
 
@@ -169,8 +172,5 @@ export interface PageLifecycleOptions<TUtilities = Record<string, unknown>>
 
 export interface PageLifecycleBaseOptions {
     onInit?: () => void;
-    onLeavePage?: {
-        disable: boolean;
-        condition?: () => boolean;
-    };
+    triggerPageLeave?: boolean | { condition?: () => boolean };
 }
