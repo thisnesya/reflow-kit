@@ -14,7 +14,15 @@ export function modalBuilder(scrollController?: Lenis) {
         closeButtons.forEach(btn => btn.addEventListener("click", close));
         onInit && onInit();
 
-        const instance = { open, close };
+        const instance = {
+            open,
+            close,
+            destroy() {
+                closeButtons.forEach(btn => btn.removeEventListener("click", close));
+                close();
+            }
+        };
+
         modals.set(name || `modal-${idx}`, instance);
 
         return instance;

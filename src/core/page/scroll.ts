@@ -3,13 +3,11 @@ import Lenis from "lenis";
 
 export function ScrollController({ lenis, useGSAP }: ScrollControllerOptions = {}) {
     const style = document.createElement("style");
-    const instance = new Lenis(lenis || { lerp: 0 });
+    const instance = new Lenis(lenis || { lerp: 0, autoRaf: useGSAP ? false : true });
 
     if (useGSAP) {
         if (typeof window.ScrollTrigger !== "undefined") gsap();
         else document.addEventListener("DOMContentLoaded", gsap);
-    } else {
-        requestAnimationFrame(raf);
     }
 
     style.textContent =
@@ -17,11 +15,6 @@ export function ScrollController({ lenis, useGSAP }: ScrollControllerOptions = {
     document.head.append(style);
 
     return instance;
-
-    function raf(t: number) {
-        instance.raf(t);
-        requestAnimationFrame(raf);
-    }
 
     function gsap() {
         instance.on("scroll", window.ScrollTrigger.update);
