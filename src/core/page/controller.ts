@@ -1,6 +1,6 @@
 export function PageLifecycle<TUtilities = Record<string, unknown>>({
     onInit,
-    triggerPageLeave = true,
+    triggerPageLeave,
     utilities = {} as TUtilities
 }: PageLifecycleOptions<TUtilities>): PageLifecycleMethods<TUtilities> {
     const domListeners: DomListener<TUtilities>[] = [];
