@@ -7,7 +7,7 @@ A lightweight utility kit for building Webflow sites with smooth scrolling, page
 Include via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@reflow/kit@latest/dist/reflow.kit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/thisnesya/reflow-kit@latest/dist/reflow.kit.min.js"></script>
 ```
 
 ## Quick Start
