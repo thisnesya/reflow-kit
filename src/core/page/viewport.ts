@@ -2,16 +2,27 @@ import { setCssProperty } from "@app/shared/dom";
 import { debounce } from "@app/shared/utils";
 
 export function setViewportHeight() {
-    // setCssProperty("--viewport-height", `${window.innerHeight}px`);
-    // setCssProperty("--dynamic-viewport-height", `${window.innerHeight}px`);
+    const isIos26 = (): boolean => {
+        const { userAgent } = navigator;
 
-    // window.addEventListener("resize", () => {
-    //     setCssProperty("--dynamic-viewport-height", `${window.innerHeight}px`);
-    // });
-    const update = () => setCssProperty("--dynamic-viewport-height", `${window.innerHeight}px`);
+        return userAgent.includes("iPhone") && userAgent.includes("Version/26");
+    };
 
-    setCssProperty("--viewport-height", `${window.innerHeight}px`);
-    update();
+    if (isIos26()) {
+        const update = () => setCssProperty("--dynamic-viewport-height", `${window.outerHeight}px`);
 
-    window.addEventListener("resize", debounce(update, 100));
+        setCssProperty("--viewport-height", `${window.outerHeight}px`);
+        setCssProperty("--ios26-bar-gap", `${window.outerHeight - window.innerHeight}px`);
+
+        update();
+
+        window.addEventListener("resize", debounce(update, 100));
+    } else {
+        const update = () => setCssProperty("--dynamic-viewport-height", `${window.innerHeight}px`);
+
+        setCssProperty("--viewport-height", `${window.innerHeight}px`);
+        update();
+
+        window.addEventListener("resize", debounce(update, 100));
+    }
 }
