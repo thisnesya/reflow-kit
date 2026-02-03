@@ -15,7 +15,7 @@ Include via CDN:
 ```javascript
 const reflowkit = ReflowKit.init({
     scroll: {
-        useGSAP: true,
+        useScrollTrigger: true,
         lenis: {
             lerp: 0.1
         }
@@ -48,13 +48,13 @@ Controls smooth scrolling via [Lenis](https://lenis.darkroom.engineering/).
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `useGSAP` | `boolean` | `false` | Sync Lenis with GSAP ticker for ScrollTrigger compatibility |
+| `useScrollTrigger` | `boolean` | `false` | Sync Lenis with GSAP ticker for ScrollTrigger compatibility |
 | `lenis` | `LenisOptions` | `{ lerp: 0 }` | Lenis configuration options |
 
 ```javascript
 ReflowKit.init({
     scroll: {
-        useGSAP: true,
+        useScrollTrigger: true,
         lenis: {
             lerp: 0.125,
             duration: 1.2,
@@ -65,7 +65,7 @@ ReflowKit.init({
 });
 ```
 
-**Note:** When `useGSAP: true`, the kit automatically:
+**Note:** When `useScrollTrigger: true`, the kit automatically:
 - Syncs Lenis RAF with GSAP ticker
 - Updates ScrollTrigger on scroll events
 - Disables GSAP lag smoothing for consistent timing
@@ -547,7 +547,7 @@ For scroll-based animations with GSAP:
 ```javascript
 const reflowkit = ReflowKit.init({
     scroll: {
-        useGSAP: true,
+        useScrollTrigger: true,
         lenis: { lerp: 0.1 }
     }
 });

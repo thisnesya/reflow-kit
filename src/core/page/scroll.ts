@@ -1,11 +1,11 @@
 import type { LenisOptions } from "lenis";
 import Lenis from "lenis";
 
-export function ScrollController({ lenis, useGSAP }: ScrollControllerOptions = {}) {
+export function ScrollController({ lenis, useScrollTrigger }: ScrollControllerOptions = {}) {
     const style = document.createElement("style");
-    const instance = new Lenis(lenis || { lerp: 0, autoRaf: useGSAP ? false : true });
+    const instance = new Lenis(lenis || { lerp: 0, autoRaf: useScrollTrigger ? false : true });
 
-    if (useGSAP) {
+    if (useScrollTrigger) {
         if (typeof window.ScrollTrigger !== "undefined") gsap();
         else document.addEventListener("DOMContentLoaded", gsap);
     }
@@ -25,5 +25,5 @@ export function ScrollController({ lenis, useGSAP }: ScrollControllerOptions = {
 
 export type ScrollControllerOptions = {
     lenis?: LenisOptions;
-    useGSAP?: boolean;
+    useScrollTrigger?: boolean;
 };
