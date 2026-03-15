@@ -27,7 +27,7 @@ function init(options: AppConfig = {}) {
         // phoneInput: phoneInput()
     };
 
-    const { on, reInit, cleanup } = PageLifecycle({ ...(options.page || {}), utilities });
+    const { on, refresh, cleanup, emit } = PageLifecycle({ ...(options.page || {}), utilities });
 
     function registerUtility(name: string, value: unknown) {
         utilities[name] = value;
@@ -35,13 +35,14 @@ function init(options: AppConfig = {}) {
 
     const instance = {
         on,
-        reInit,
+        refresh,
         cleanup,
+        emit,
         registerUtility,
         utils: utilities,
         scroll,
         components,
-        content: {}
+        content: {} as Record<any, unknown>
     };
 
     defineProperty(instance, "_developer", "t.me/drmc0de");

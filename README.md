@@ -157,28 +157,40 @@ reflowkit.on("page:domready", (utils) => {
 | `scope` | `string` | Scope name for selective cleanup/reInit |
 | `name` | `string` | Font family name (only for `page:fontready`) |
 
-### `cleanup(scope?)`
+### `cleanup(scope?, detach?)`
 
-Run cleanup functions for registered listeners.
+Run cleanup functions and by default remove the listeners entirely so they won't run again on `refresh`. Pass `false` as the second argument to retain the listeners (only the cleanup fn reference is cleared).
 
 ```javascript
-// Cleanup all listeners
+// Cleanup all listeners and remove them
 await reflowkit.cleanup();
 
-// Cleanup only "home" scope
+// Cleanup only "home" scope and remove those listeners
 await reflowkit.cleanup("home");
+
+// Cleanup but keep listeners registered (they'll run again on refresh)
+await reflowkit.cleanup("home", false);
 ```
 
-### `reInit(scope?)`
+### `refresh(scope?)`
 
-Re-run initialization for listeners. Useful after dynamic content changes.
+Re-run `page:before`, `page:domready` listeners, and `page:ready`. Useful after dynamic content changes.
 
 ```javascript
 // Re-initialize all
-await reflowkit.reInit();
+await reflowkit.refresh();
 
 // Re-initialize only "cases" scope
-await reflowkit.reInit("cases");
+await reflowkit.refresh("cases");
+```
+
+### `emit(event)`
+
+Manually emit any lifecycle event to trigger its registered listener.
+
+```javascript
+await reflowkit.emit("page:leave");
+await reflowkit.emit("page:restore");
 ```
 
 ## Scroll Controller

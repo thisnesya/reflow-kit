@@ -24,7 +24,7 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
     async function init() {
         onInit?.();
 
-        document.addEventListener("load", () => triggerEvent("page:load"));
+        window.addEventListener("load", () => triggerEvent("page:load"));
         document.fonts.ready.then(() => triggerEvent("page:fontready"));
 
         domReady.then(async () => {
@@ -66,7 +66,7 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
                     eventListeners[event] = cb;
             }
         },
-        async reInit(scope?: string) {
+        async refresh(scope?: string) {
             await triggerEvent("page:before");
 
             const listeners = domListeners.filter(l => (scope ? l.scope === scope : true));
@@ -74,7 +74,7 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
 
             await triggerEvent("page:ready");
         },
-        async cleanup(scope?: string) {
+        async cleanup(scope?: string, detach = true) {
             const listeners = domListeners.filter(l => (scope ? l.scope === scope : true));
 
             const cleanups = listeners
@@ -83,9 +83,19 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
 
             await Promise.allSettled(cleanups.map(fn => fn()));
 
-            listeners.forEach(l => {
-                l.cleanup = undefined;
-            });
+            if (detach) {
+                listeners.forEach(l => {
+                    const index = domListeners.indexOf(l);
+                    if (index !== -1) domListeners.splice(index, 1);
+                });
+            } else {
+                listeners.forEach(l => {
+                    l.cleanup = undefined;
+                });
+            }
+        },
+        async emit(event: keyof EventsMap<TUtilities>) {
+            await triggerEvent(event);
         }
     };
 
@@ -139,8 +149,9 @@ export interface PageLifecycleMethods<TUtilities = Record<string, unknown>> {
         callback: EventsMap<TUtilities>[E],
         options?: { name?: string; scope?: string }
     ): void;
-    reInit(scope?: string): Promise<void>;
-    cleanup(scope?: string): Promise<void>;
+    refresh(scope?: string): Promise<void>;
+    cleanup(scope?: string, detach?: boolean): Promise<void>;
+    emit(event: keyof EventsMap<TUtilities>): Promise<void>;
 }
 
 type EventListener<TUtilities = Record<string, unknown>> = (
@@ -165,8 +176,9 @@ type EventsMap<TUtilities = Record<string, unknown>> = {
     "page:load": EventListener<TUtilities>;
 };
 
-export interface PageLifecycleOptions<TUtilities = Record<string, unknown>>
-    extends PageLifecycleBaseOptions {
+export interface PageLifecycleOptions<
+    TUtilities = Record<string, unknown>
+> extends PageLifecycleBaseOptions {
     utilities?: TUtilities;
 }
 
