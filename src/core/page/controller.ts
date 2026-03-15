@@ -110,8 +110,8 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         async emit(event: keyof EventsMap<TUtilities>) {
             await triggerEvent(event);
         },
-        get listeners(): ListenerInfo[] {
-            return domListeners.map(debugInfo);
+        get listeners() {
+            return domListeners;
         }
     };
 
@@ -172,7 +172,7 @@ export interface PageLifecycleMethods<TUtilities = Record<string, unknown>> {
     refresh(scope?: string): Promise<void>;
     cleanup(scope?: string, detach?: boolean): Promise<void>;
     emit(event: keyof EventsMap<TUtilities>): Promise<void>;
-    readonly listeners: ListenerInfo[];
+    readonly listeners: any;
 }
 
 export type ListenerInfo = {
