@@ -1,6 +1,7 @@
 export function PageLifecycle<TUtilities = Record<string, unknown>>({
     onInit,
     triggerPageLeave,
+    debug = false,
     utilities = {} as TUtilities
 }: PageLifecycleOptions<TUtilities>): PageLifecycleMethods<TUtilities> {
     const domListeners: DomListener<TUtilities>[] = [];
@@ -67,15 +68,27 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
             }
         },
         async refresh(scope?: string) {
-            await triggerEvent("page:before");
-
             const listeners = domListeners.filter(l => (scope ? l.scope === scope : true));
-            await Promise.all(listeners.map(runDomListener));
 
+            if (debug) {
+                console.group(`[ReflowKit] refresh(${scope ?? ""})`);
+                console.log("listeners to run:", listeners.map(debugInfo));
+                console.groupEnd();
+            }
+
+            await triggerEvent("page:before");
+            await Promise.all(listeners.map(runDomListener));
             await triggerEvent("page:ready");
         },
         async cleanup(scope?: string, detach = true) {
             const listeners = domListeners.filter(l => (scope ? l.scope === scope : true));
+
+            if (debug) {
+                console.group(`[ReflowKit] cleanup(${scope ?? ""})`);
+                console.log("detach:", detach);
+                console.log("listeners to clean:", listeners.map(debugInfo));
+                console.groupEnd();
+            }
 
             const cleanups = listeners
                 .map(l => l.cleanup)
@@ -96,8 +109,15 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         },
         async emit(event: keyof EventsMap<TUtilities>) {
             await triggerEvent(event);
+        },
+        get listeners(): ListenerInfo[] {
+            return domListeners.map(debugInfo);
         }
     };
+
+    function debugInfo(l: DomListener<TUtilities>): ListenerInfo {
+        return { scope: l.scope, hasCleanup: typeof l.cleanup === "function", fn: l.cb };
+    }
 
     async function runDomListener(listener: DomListener<TUtilities>) {
         const result = await listener.cb(utilities);
@@ -152,7 +172,14 @@ export interface PageLifecycleMethods<TUtilities = Record<string, unknown>> {
     refresh(scope?: string): Promise<void>;
     cleanup(scope?: string, detach?: boolean): Promise<void>;
     emit(event: keyof EventsMap<TUtilities>): Promise<void>;
+    readonly listeners: ListenerInfo[];
 }
+
+export type ListenerInfo = {
+    scope?: string;
+    hasCleanup: boolean;
+    fn: Function;
+};
 
 type EventListener<TUtilities = Record<string, unknown>> = (
     tools: TUtilities
@@ -185,4 +212,5 @@ export interface PageLifecycleOptions<
 export interface PageLifecycleBaseOptions {
     onInit?: () => void;
     triggerPageLeave?: boolean | { condition?: () => boolean };
+    debug?: boolean;
 }
