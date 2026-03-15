@@ -8,5 +8,4 @@ export interface AppConfig {
     scroll?: ScrollControllerOptions;
     page?: PageLifecycleBaseOptions;
     devices?: DeviceDetectorOptions;
-    debug?: boolean;
 }

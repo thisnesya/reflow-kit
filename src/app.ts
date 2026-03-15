@@ -27,10 +27,9 @@ function init(options: AppConfig = {}) {
         // phoneInput: phoneInput()
     };
 
-    const { on, refresh, cleanup, emit, listeners } = PageLifecycle({
+    const { on, refresh, cleanup, emit } = PageLifecycle({
         ...(options.page || {}),
-        utilities,
-        debug: options.debug
+        utilities
     });
 
     function registerUtility(name: string, value: unknown) {
@@ -42,7 +41,6 @@ function init(options: AppConfig = {}) {
         refresh,
         cleanup,
         emit,
-        listeners,
         registerUtility,
         utils: utilities,
         scroll,
