@@ -4,10 +4,9 @@ export function modalBuilder(scrollController?: Lenis) {
     const modals = new Map<string, Modal>();
     let idx = 0;
 
-    function build(node: HTMLElement, { name, onInit, onOpen, onClose }: ModalOptions = {}): Modal {
+    function build(node: HTMLElement, { name, onInit, onOpen, onClose, onOpenComplete, onCloseComplete }: ModalOptions = {}): Modal {
         idx++;
 
-        const background = $('<div class="modal-background">')[0];
         const closeButtons = node.querySelectorAll('[data-action="close"]');
         const animationDuration = 510;
 
@@ -17,6 +16,7 @@ export function modalBuilder(scrollController?: Lenis) {
         const instance = {
             open,
             close,
+            isOpen,
             destroy() {
                 closeButtons.forEach(btn => btn.removeEventListener("click", close));
                 close();
@@ -27,33 +27,37 @@ export function modalBuilder(scrollController?: Lenis) {
 
         return instance;
 
+        function isOpen() {
+            return node.classList.contains("is-open");
+        }
+
         function open() {
             if (scrollController) scrollController.stop();
 
-            background.addEventListener("click", close);
             document.addEventListener("keyup", listenEscape);
-            document.body.append(background);
+
+            document.body.classList.add("modal-opened");
+            node.classList.add("is-open");
+
+            onOpen && onOpen();
 
             setTimeout(() => {
-                document.body.classList.add("modal-opened");
-                node.classList.add("is-open");
-
-                onOpen && onOpen();
-            }, 10);
+                onOpenComplete && onOpenComplete();
+            }, animationDuration);
         }
 
         function close() {
-            background.removeEventListener("click", close);
             document.removeEventListener("keyup", listenEscape);
 
             node.classList.remove("is-open");
             document.body.classList.remove("modal-opened");
 
+            onClose && onClose();
+
             setTimeout(() => {
                 if (scrollController) scrollController.start();
-                background.remove();
 
-                onClose && onClose();
+                onCloseComplete && onCloseComplete();
             }, animationDuration);
         }
 
@@ -72,11 +76,14 @@ export function modalBuilder(scrollController?: Lenis) {
 type ModalOptions = {
     name?: string;
     onInit?: () => void;
-    onClose?: () => void;
     onOpen?: () => void;
+    onClose?: () => void;
+    onOpenComplete?: () => void;
+    onCloseComplete?: () => void;
 };
 
 type Modal = {
     open: () => void;
     close: () => void;
+    isOpen: () => boolean;
 };

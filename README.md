@@ -1,6 +1,7 @@
 # ReflowKit
 
-A lightweight utility kit for building Webflow sites with smooth scrolling, page lifecycle management, and common UI components.
+A lightweight utility kit for building Webflow sites with smooth scrolling, page lifecycle
+management, and common UI components.
 
 ## Installation
 
@@ -46,10 +47,10 @@ reflowkit.on("page:domready", ({ toArray, scroll }) => {
 
 Controls smooth scrolling via [Lenis](https://lenis.darkroom.engineering/).
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `useScrollTrigger` | `boolean` | `false` | Sync Lenis with GSAP ticker for ScrollTrigger compatibility |
-| `lenis` | `LenisOptions` | `{ lerp: 0 }` | Lenis configuration options |
+| Option             | Type           | Default       | Description                                                 |
+| ------------------ | -------------- | ------------- | ----------------------------------------------------------- |
+| `useScrollTrigger` | `boolean`      | `false`       | Sync Lenis with GSAP ticker for ScrollTrigger compatibility |
+| `lenis`            | `LenisOptions` | `{ lerp: 0 }` | Lenis configuration options                                 |
 
 ```javascript
 ReflowKit.init({
@@ -66,6 +67,7 @@ ReflowKit.init({
 ```
 
 **Note:** When `useScrollTrigger: true`, the kit automatically:
+
 - Syncs Lenis RAF with GSAP ticker
 - Updates ScrollTrigger on scroll events
 - Disables GSAP lag smoothing for consistent timing
@@ -74,10 +76,10 @@ ReflowKit.init({
 
 Page lifecycle configuration.
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| Option             | Type                                      | Default | Description                                  |
+| ------------------ | ----------------------------------------- | ------- | -------------------------------------------- |
 | `triggerPageLeave` | `boolean \| { condition: () => boolean }` | `false` | Trigger `page:leave` event before navigation |
-| `onInit` | `() => void` | - | Called immediately on initialization |
+| `onInit`           | `() => void`                              | -       | Called immediately on initialization         |
 
 ```javascript
 ReflowKit.init({
@@ -95,12 +97,12 @@ ReflowKit.init({
 
 Device detection breakpoints.
 
-| Option | Type | Default |
-|--------|------|---------|
-| `mobile.max` | `number` | `479` |
-| `tablet.min` | `number` | `768` |
-| `tablet.max` | `number` | `991` |
-| `desktop.min` | `number` | `1025` |
+| Option        | Type     | Default |
+| ------------- | -------- | ------- |
+| `mobile.max`  | `number` | `479`   |
+| `tablet.min`  | `number` | `768`   |
+| `tablet.max`  | `number` | `991`   |
+| `desktop.min` | `number` | `1025`  |
 
 ```javascript
 ReflowKit.init({
@@ -116,50 +118,56 @@ ReflowKit.init({
 
 ### Events
 
-| Event | Description |
-|-------|-------------|
-| `page:before` | Fires before DOM ready handlers run |
-| `page:fontready` | Fires when fonts are loaded |
-| `page:domready` | Main initialization event - register your listeners here |
-| `page:ready` | Fires after all `page:domready` handlers complete |
-| `page:load` | Fires on window load |
-| `page:restore` | Fires when page is restored from bfcache |
-| `page:leave` | Fires before navigation (if `triggerPageLeave` enabled) |
+| Event            | Description                                              |
+| ---------------- | -------------------------------------------------------- |
+| `page:before`    | Fires before DOM ready handlers run                      |
+| `page:fontready` | Fires when fonts are loaded                              |
+| `page:domready`  | Main initialization event - register your listeners here |
+| `page:ready`     | Fires after all `page:domready` handlers complete        |
+| `page:load`      | Fires on window load                                     |
+| `page:restore`   | Fires when page is restored from bfcache                 |
+| `page:leave`     | Fires before navigation (if `triggerPageLeave` enabled)  |
 
 ### `on(event, callback, options?)`
 
 Register event listeners.
 
 ```javascript
-reflowkit.on("page:domready", (utils) => {
-    const { toArray, scroll, isMobile } = utils;
+reflowkit.on(
+    "page:domready",
+    utils => {
+        const { toArray, scroll, isMobile } = utils;
 
-    if (isMobile()) return;
+        if (isMobile()) return;
 
-    const cards = toArray(".card");
-    cards.forEach(card => {
-        card.addEventListener("click", handleClick);
-    });
-
-    // Return cleanup function
-    return () => {
+        const cards = toArray(".card");
         cards.forEach(card => {
-            card.removeEventListener("click", handleClick);
+            card.addEventListener("click", handleClick);
         });
-    };
-}, { scope: "home" });
+
+        // Return cleanup function
+        return () => {
+            cards.forEach(card => {
+                card.removeEventListener("click", handleClick);
+            });
+        };
+    },
+    { scope: "home" }
+);
 ```
 
 **Options:**
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `scope` | `string` | Scope name for selective cleanup/reInit |
-| `name` | `string` | Font family name (only for `page:fontready`) |
+| Option  | Type     | Description                                  |
+| ------- | -------- | -------------------------------------------- |
+| `scope` | `string` | Scope name for selective cleanup/reInit      |
+| `name`  | `string` | Font family name (only for `page:fontready`) |
 
 ### `cleanup(scope?, detach?)`
 
-Run cleanup functions and by default remove the listeners entirely so they won't run again on `refresh`. Pass `false` as the second argument to retain the listeners (only the cleanup fn reference is cleared).
+Run cleanup functions and by default remove the listeners entirely so they won't run again on
+`refresh`. Pass `false` as the second argument to retain the listeners (only the cleanup fn
+reference is cleared).
 
 ```javascript
 // Cleanup all listeners and remove them
@@ -174,7 +182,8 @@ await reflowkit.cleanup("home", false);
 
 ### `refresh(scope?)`
 
-Re-run `page:before`, `page:domready` listeners, and `page:ready`. Useful after dynamic content changes.
+Re-run `page:before`, `page:domready` listeners, and `page:ready`. Useful after dynamic content
+changes.
 
 ```javascript
 // Re-initialize all
@@ -225,15 +234,14 @@ scroll.on("scroll", ({ scroll, velocity, direction }) => {
 Build modals with automatic scroll locking.
 
 ```javascript
-const modal = reflowkit.components.modal.build(
-    document.querySelector(".modal"),
-    {
-        name: "contact",
-        onInit: () => console.log("Modal initialized"),
-        onOpen: () => console.log("Modal opened"),
-        onClose: () => console.log("Modal closed")
-    }
-);
+const modal = reflowkit.components.modal.build(document.querySelector(".modal"), {
+    name: "contact",
+    onInit: () => console.log("Modal initialized"),
+    onOpen: () => console.log("Modal opening"),
+    onClose: () => console.log("Modal closing"),
+    onOpenComplete: () => console.log("Modal open animation complete"),
+    onCloseComplete: () => console.log("Modal close animation complete")
+});
 
 // Open modal
 modal.open();
@@ -241,12 +249,18 @@ modal.open();
 // Close modal
 modal.close();
 
+// Check if modal is open
+modal.isOpen();
+
 // Destroy modal (cleanup listeners)
 modal.destroy();
 
 // Get modal by name
 const contactModal = reflowkit.components.modal.get("contact");
 ```
+
+`onOpen`/`onClose` fire immediately alongside the state change (no delay).
+`onOpenComplete`/`onCloseComplete` fire after the animation duration elapses.
 
 **HTML Structure:**
 
@@ -260,6 +274,7 @@ const contactModal = reflowkit.components.modal.get("contact");
 ```
 
 **CSS Classes (auto-applied):**
+
 - `modal-opened` - Added to `body` when modal is open
 - `is-open` - Added to modal element when open
 
@@ -270,7 +285,7 @@ Custom dropdown select for Webflow.
 ```javascript
 const select = reflowkit.components.selectInput.build(
     document.querySelector(".custom-select"),
-    (input) => {
+    input => {
         console.log("Selected:", input.value);
     }
 );
@@ -285,11 +300,11 @@ const select = reflowkit.components.selectInput.build(
     </div>
     <nav class="w-dropdown-list">
         <label>
-            <input type="radio" name="option" value="Option 1">
+            <input type="radio" name="option" value="Option 1" />
             Option 1
         </label>
         <label>
-            <input type="radio" name="option" value="Option 2">
+            <input type="radio" name="option" value="Option 2" />
             Option 2
         </label>
     </nav>
@@ -297,6 +312,7 @@ const select = reflowkit.components.selectInput.build(
 ```
 
 **CSS Classes (auto-applied):**
+
 - `is-selected` - Added to toggle when option is selected
 - `is-valid` - Added to toggle when valid selection made
 - `is-invalid` - Removed when valid selection made
@@ -435,11 +451,11 @@ const data = getFormData(document.querySelector("form"));
 Debounce function calls.
 
 ```javascript
-const debouncedSearch = debounce((query) => {
+const debouncedSearch = debounce(query => {
     fetch(`/search?q=${query}`);
 }, 300);
 
-input.addEventListener("input", (e) => debouncedSearch(e.target.value));
+input.addEventListener("input", e => debouncedSearch(e.target.value));
 ```
 
 #### `sleep(ms)`
@@ -484,7 +500,7 @@ await webflowReady();
 Register custom utilities available in all lifecycle callbacks.
 
 ```javascript
-reflowkit.registerUtility("syncWebflowTabs", function(source, targets = []) {
+reflowkit.registerUtility("syncWebflowTabs", function (source, targets = []) {
     const sourceLinks = source.querySelectorAll(".w-tab-menu .w-tab-link");
 
     sourceLinks.forEach(link => {
@@ -509,14 +525,18 @@ reflowkit.registerUtility("syncWebflowTabs", function(source, targets = []) {
 });
 
 // Use in lifecycle
-reflowkit.on("page:domready", ({ syncWebflowTabs }) => {
-    const source = document.getElementById("tab-head");
-    const target = document.getElementById("tab-body");
+reflowkit.on(
+    "page:domready",
+    ({ syncWebflowTabs }) => {
+        const source = document.getElementById("tab-head");
+        const target = document.getElementById("tab-body");
 
-    const { destroy } = syncWebflowTabs(source, [target]);
+        const { destroy } = syncWebflowTabs(source, [target]);
 
-    return destroy;
-}, { scope: "cases" });
+        return destroy;
+    },
+    { scope: "cases" }
+);
 ```
 
 ## Device Detection
@@ -541,9 +561,9 @@ reflowkit.on("page:domready", ({ isMobile, isTablet, isDesktop }) => {
 
 The kit sets these CSS variables automatically:
 
-| Variable | Description |
-|----------|-------------|
-| `--viewport-height` | Initial viewport height (set once) |
+| Variable                    | Description                                        |
+| --------------------------- | -------------------------------------------------- |
+| `--viewport-height`         | Initial viewport height (set once)                 |
 | `--dynamic-viewport-height` | Updated on resize (useful for mobile 100vh issues) |
 
 ```css
