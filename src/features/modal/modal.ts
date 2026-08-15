@@ -4,11 +4,21 @@ export function modalBuilder(scrollController?: Lenis) {
     const modals = new Map<string, Modal>();
     let idx = 0;
 
-    function build(node: HTMLElement, { name, onInit, onOpen, onClose, onOpenComplete, onCloseComplete }: ModalOptions = {}): Modal {
+    function build(
+        node: HTMLElement,
+        {
+            name,
+            onInit,
+            onOpen,
+            onClose,
+            onOpenComplete,
+            onCloseComplete,
+            animationDuration = 500
+        }: ModalOptions = {}
+    ): Modal {
         idx++;
 
         const closeButtons = node.querySelectorAll('[data-action="close"]');
-        const animationDuration = 510;
 
         closeButtons.forEach(btn => btn.addEventListener("click", close));
         onInit && onInit();
@@ -43,7 +53,7 @@ export function modalBuilder(scrollController?: Lenis) {
 
             setTimeout(() => {
                 onOpenComplete && onOpenComplete();
-            }, animationDuration);
+            }, animationDuration + 5);
         }
 
         function close() {
@@ -58,7 +68,7 @@ export function modalBuilder(scrollController?: Lenis) {
                 if (scrollController) scrollController.start();
 
                 onCloseComplete && onCloseComplete();
-            }, animationDuration);
+            }, animationDuration + 5);
         }
 
         function listenEscape(evt: KeyboardEvent) {
@@ -75,6 +85,7 @@ export function modalBuilder(scrollController?: Lenis) {
 
 type ModalOptions = {
     name?: string;
+    animationDuration?: number;
     onInit?: () => void;
     onOpen?: () => void;
     onClose?: () => void;
