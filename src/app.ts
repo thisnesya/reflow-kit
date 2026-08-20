@@ -29,7 +29,8 @@ function init(options: AppConfig = {}) {
 
     const { on, refresh, cleanup, emit } = PageLifecycle({
         ...(options.page || {}),
-        utilities
+        utilities,
+        scroll
     });
 
     function registerUtility(name: string, value: unknown) {
