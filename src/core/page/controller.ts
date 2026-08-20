@@ -1,6 +1,10 @@
+import type Lenis from "lenis";
+
 export function PageLifecycle<TUtilities = Record<string, unknown>>({
     onInit,
+    scroll,
     triggerPageLeave,
+    lockScrollUntilReady,
     utilities = {} as TUtilities
 }: PageLifecycleOptions<TUtilities>): PageLifecycleMethods<TUtilities> {
     const domListeners: DomListener<TUtilities>[] = [];
@@ -19,7 +23,12 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         document.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
     });
 
-    init();
+    if (lockScrollUntilReady) {
+        scroll.stop();
+        init().then(() => scroll.start());
+    } else {
+        init();
+    }
 
     async function init() {
         onInit?.();
@@ -188,6 +197,8 @@ export interface PageLifecycleOptions<
 }
 
 export interface PageLifecycleBaseOptions {
+    scroll: Lenis;
     onInit?: () => void;
+    lockScrollUntilReady?: boolean;
     triggerPageLeave?: boolean | { condition?: () => boolean };
 }
