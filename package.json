@@ -7,7 +7,7 @@
     "jsdelivr": "dist/reflow.kit.min.js",
     "scripts": {
         "build": "node esbuild.config.js",
-        "dev": "esbuild src/app.ts --bundle --outfile=dist/app.js --watch --sourcemap",
+        "dev": "esbuild src/app.ts --bundle --outfile=dist/reflowkit.min.js --watch --serve=3001 --servedir=.",
         "release": "node publish.js"
     },
     "keywords": [],

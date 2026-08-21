@@ -34,16 +34,14 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         onInit?.();
 
         window.addEventListener("load", () => triggerEvent("page:load"));
-        document.fonts.ready.then(() => triggerEvent("page:fontready"));
 
-        domReady.then(async () => {
-            await document.fonts.ready;
-            await triggerEvent("page:before");
-            await Promise.all(domListeners.map(runDomListener));
-        });
+        await triggerEvent("page:before");
 
         await document.fonts.ready;
+        await triggerEvent("page:fontready");
+
         await domReady;
+        await Promise.all(domListeners.map(runDomListener));
 
         await triggerEvent("page:ready");
         console.log("page:%c ready", "color:green;");
