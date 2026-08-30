@@ -566,7 +566,7 @@ function init(options = {}) {
     content: {}
   };
   defineProperty(instance, "_developer", "t.me/drmc0de");
-  defineProperty(instance, "_version", "1.1.0");
+  defineProperty(instance, "_version", "1.1.1");
   return instance;
 }
 export {

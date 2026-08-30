@@ -591,6 +591,31 @@ reflowkit.on(
 );
 ```
 
+### Typing custom utilities
+
+`registerUtility` adds entries at runtime, so TypeScript cannot infer them. Declare them once on
+the `CustomUtils` interface and they are typed everywhere — on `instance.utils` and in every
+lifecycle callback:
+
+```typescript
+declare module "@reflow/kit" {
+    interface CustomUtils {
+        syncWebflowTabs(source: HTMLElement, targets?: HTMLElement[]): { destroy(): void };
+        apiBase: string;
+    }
+}
+```
+
+Put this in any `.ts` file in your project (or a `reflow-kit.d.ts`). From then on:
+
+```typescript
+reflowkit.registerUtility("apiBase", "https://api.example.com"); // value is checked
+reflowkit.utils.apiBase; // string
+reflowkit.on("page:domready", ({ syncWebflowTabs }) => { ... }); // typed
+```
+
+Utilities you have not declared still work at runtime; they are just untyped.
+
 ## Device Detection
 
 ```javascript

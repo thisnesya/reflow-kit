@@ -47,3 +47,6 @@ const utils = {
 };
 
 export { utils };
+
+/** The built-in utilities, inferred from the `utils` bag above. */
+export type Utils = typeof utils;

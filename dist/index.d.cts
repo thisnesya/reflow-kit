@@ -79,6 +79,66 @@ export interface Article {
 export interface SelectInput {
 	build(node: HTMLElement, onChange?: (input: HTMLInputElement) => void): void;
 }
+declare function getFormData(node: HTMLFormElement): Data;
+type Data = {
+	[key: string]: any;
+};
+declare function debounce<F extends (...args: any[]) => void>(func: F, ms: number): (this: unknown, ...args: Parameters<F>) => void;
+declare function sleep(ms: number): Promise<unknown>;
+declare function toArray(value: string, scope?: Document | Element): Element[];
+declare function nthElement(arr?: Array<any>, every?: number, from?: number): any[];
+declare function getQueryParam(name: string, url?: string): string | null;
+declare function getQueryParams(url?: string): Params;
+declare function getUtmQueries(): {
+	source: string | null;
+	medium: string | null;
+	campaign: string | null;
+	term: string | null;
+	content: string | null;
+	id: string | null;
+};
+declare function setQueryParam(name: string, value: string | number | boolean, options?: QueryParamOptions): void;
+declare function deleteQueryParam(name: string, options?: QueryParamOptions): void;
+type QueryParamOptions = {
+	/** Add a history entry instead of replacing the current one. Default: `false`. */
+	push?: boolean;
+};
+type Params = {
+	[key: string]: string;
+};
+declare function setCssProperty(name: string, value: string, node?: HTMLElement): void;
+declare function hideElement(node: HTMLElement): void;
+declare function showElement(node: HTMLElement): void;
+declare function toggleElement(node: HTMLElement): void;
+declare function getAttribute(node: HTMLElement, name: string): string | Attr | null;
+declare function getTemplate(id: string): Node | null | undefined;
+type Callback = () => void;
+declare function onClassChange(node: HTMLElement, callback: Callback): {
+	off(): void;
+};
+declare function restartWebflow(): Promise<unknown>;
+declare const utils: {
+	getFormData: typeof getFormData;
+	getQueryParam: typeof getQueryParam;
+	getQueryParams: typeof getQueryParams;
+	getUtmQueries: typeof getUtmQueries;
+	setQueryParam: typeof setQueryParam;
+	deleteQueryParam: typeof deleteQueryParam;
+	getTemplate: typeof getTemplate;
+	setCssProperty: typeof setCssProperty;
+	onClassChange: typeof onClassChange;
+	sleep: typeof sleep;
+	toArray: typeof toArray;
+	debounce: typeof debounce;
+	nthElement: typeof nthElement;
+	hideElement: typeof hideElement;
+	showElement: typeof showElement;
+	toggleElement: typeof toggleElement;
+	getAttribute: typeof getAttribute;
+	restartWebflow: typeof restartWebflow;
+	webflowReady: () => Promise<unknown>;
+};
+type Utils = typeof utils;
 export interface AppConfig {
 	scroll?: ScrollControllerOptions;
 	page?: PageLifecycleBaseOptions;
@@ -89,10 +149,35 @@ export interface ReflowKitComponents {
 	selectInput: SelectInput;
 	article: Article;
 }
-export interface ReflowKitInstance extends PageLifecycleMethods {
-	/** Register an extra utility exposed to every page lifecycle listener. */
-	registerUtility(name: string, value: unknown): void;
-	utils: Record<string, unknown>;
+/** Utilities every instance ships with. */
+export interface BaseUtils extends Utils {
+	isMobile(): boolean;
+	isTablet(): boolean;
+	isDesktop(): boolean;
+	scroll: Lenis;
+}
+/**
+ * Augmentation point for utilities added at runtime with `registerUtility`.
+ * Declare them once and they show up on `instance.utils` and in every listener:
+ *
+ * ```ts
+ * declare module "@reflow/kit" {
+ *     interface CustomUtils {
+ *         gsap: typeof import("gsap").gsap;
+ *     }
+ * }
+ * ```
+ */
+export interface CustomUtils {
+}
+export type ReflowKitUtils = BaseUtils & CustomUtils;
+export interface ReflowKitInstance extends PageLifecycleMethods<ReflowKitUtils> {
+	/**
+	 * Register an extra utility exposed on `utils` and to every lifecycle listener.
+	 * Declare it on {@link CustomUtils} to have it typed.
+	 */
+	registerUtility<K extends string>(name: K, value: K extends keyof CustomUtils ? CustomUtils[K] : unknown): void;
+	utils: ReflowKitUtils;
 	scroll: Lenis;
 	components: ReflowKitComponents;
 	content: Record<any, unknown>;

@@ -2,8 +2,11 @@ export { init } from "./app";
 
 export type {
     AppConfig,
+    BaseUtils,
+    CustomUtils,
     ReflowKitComponents,
-    ReflowKitInstance
+    ReflowKitInstance,
+    ReflowKitUtils
 } from "@app/types";
 export type {
     DeviceDetectorOptions,
