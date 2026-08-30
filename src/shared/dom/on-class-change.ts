@@ -2,21 +2,26 @@ type Callback = () => void;
 
 const observedNodes = new Map<HTMLElement, { prevClass: Set<string>; callbacks: Set<Callback> }>();
 
-const observer = new MutationObserver(list => {
-    for (const { type, attributeName, target } of list) {
-        if (type === "attributes" && attributeName === "class") {
-            const entry = observedNodes.get(target as HTMLElement);
-            if (!entry) continue;
+let observer: MutationObserver | null = null;
 
-            const currentClass = new Set((target as HTMLElement).classList);
+// Created on first use so importing the package stays safe outside the browser.
+function getObserver() {
+    return (observer ??= new MutationObserver(list => {
+        for (const { type, attributeName, target } of list) {
+            if (type === "attributes" && attributeName === "class") {
+                const entry = observedNodes.get(target as HTMLElement);
+                if (!entry) continue;
 
-            if (!isEqual(currentClass, entry.prevClass)) {
-                entry.prevClass = currentClass;
-                entry.callbacks.forEach(cb => cb());
+                const currentClass = new Set((target as HTMLElement).classList);
+
+                if (!isEqual(currentClass, entry.prevClass)) {
+                    entry.prevClass = currentClass;
+                    entry.callbacks.forEach(cb => cb());
+                }
             }
         }
-    }
-});
+    }));
+}
 
 function isEqual(a: Set<string>, b: Set<string>): boolean {
     if (a.size !== b.size) return false;
@@ -30,7 +35,7 @@ export function onClassChange(node: HTMLElement, callback: Callback) {
     if (!entry) {
         entry = { prevClass: new Set(node.classList), callbacks: new Set() };
         observedNodes.set(node, entry);
-        observer.observe(node, { attributes: true, attributeFilter: ["class"] });
+        getObserver().observe(node, { attributes: true, attributeFilter: ["class"] });
     }
 
     entry.callbacks.add(callback);

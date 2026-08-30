@@ -23,7 +23,7 @@
 
         "baseUrl": "./",
         "outDir": "'dist",
-        "types": ["./src/app.d.ts", "jquery"],
+        "types": ["./src/globals.d.ts", "jquery"],
         "paths": {
             "@app/core": ["src/core"],
             "@app/types": ["src/types"],

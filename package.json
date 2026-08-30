@@ -1,22 +1,56 @@
 {
     "name": "@reflow/kit",
-    "version": "1.0.17",
-    "description": "",
-    "main": "dist/reflow.kit.min.js",
-    "unpkg": "dist/reflow.kit.min.js",
-    "jsdelivr": "dist/reflow.kit.min.js",
+    "version": "1.1.0",
+    "description": "A lightweight utility kit for building Webflow sites with smooth scrolling, page lifecycle management, and common UI components.",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "unpkg": "./dist/reflow.kit.min.js",
+    "jsdelivr": "./dist/reflow.kit.min.js",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
+        },
+        "./browser": "./dist/reflow.kit.min.js",
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "sideEffects": [
+        "./dist/reflow.kit.min.js"
+    ],
     "scripts": {
         "build": "node esbuild.config.js",
-        "dev": "esbuild src/app.ts --bundle --outfile=dist/reflowkit.min.js --watch --serve=3001 --servedir=.",
+        "typecheck": "tsc --noEmit",
+        "dev": "esbuild src/browser.ts --bundle --outfile=dist/reflow.kit.min.js --define:__REFLOW_VERSION__='\"dev\"' --watch --serve=3001 --servedir=.",
         "release": "node publish.js"
     },
-    "keywords": [],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thisnesya/reflow-kit.git"
+    },
+    "keywords": [
+        "webflow",
+        "lenis",
+        "scroll",
+        "utils"
+    ],
     "author": "",
     "license": "ISC",
-    "type": "module",
     "packageManager": "pnpm@10.12.1",
     "devDependencies": {
         "@types/jquery": "^3.5.33",
+        "dts-bundle-generator": "^9.5.1",
         "esbuild": "^0.25.9",
         "typescript": "^5.9.2"
     },

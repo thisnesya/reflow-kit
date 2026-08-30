@@ -5,11 +5,33 @@ management, and common UI components.
 
 ## Installation
 
-Include via CDN:
+### As a package
+
+```bash
+pnpm add github:thisnesya/reflow-kit
+```
+
+Ships ESM, CommonJS and TypeScript declarations. The only export is `init`:
+
+```ts
+import { init } from "@reflow/kit";
+
+const reflowkit = init({ scroll: { useScrollTrigger: true } });
+```
+
+Option and instance types are exported too, for typing your own helpers:
+
+```ts
+import type { AppConfig, ReflowKitInstance } from "@reflow/kit";
+```
+
+### Via CDN
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/thisnesya/reflow-kit@latest/dist/reflow.kit.min.js"></script>
 ```
+
+The browser build exposes a single global, `ReflowKit`, with `init` on it.
 
 ## Quick Start
 
@@ -432,6 +454,36 @@ Get UTM parameters.
 const utm = getUtmQueries();
 // { source, medium, campaign, term, content, id }
 ```
+
+#### `setQueryParam(name, value, options?)`
+
+Add or overwrite a query parameter on the current URL. Rewrites the address bar via the History
+API — the page is never reloaded. Numbers and booleans are stringified, values are encoded.
+
+```javascript
+setQueryParam("tab", "specs"); // /product → /product?tab=specs
+setQueryParam("page", 2); // → /product?tab=specs&page=2
+setQueryParam("tab", "reviews"); // → /product?tab=reviews&page=2
+```
+
+#### `deleteQueryParam(name, options?)`
+
+Remove a query parameter from the current URL. Removing the last one drops the `?` entirely.
+Unknown names are a no-op.
+
+```javascript
+deleteQueryParam("page"); // /product?tab=reviews&page=2 → /product?tab=reviews
+deleteQueryParam("tab"); // → /product
+```
+
+Both replace the current history entry by default, so the back button is unaffected. Pass
+`{ push: true }` to add an entry instead, making the change reversible with the back button:
+
+```javascript
+setQueryParam("filter", "new", { push: true });
+```
+
+The path and hash are always preserved.
 
 ### Form Utilities
 

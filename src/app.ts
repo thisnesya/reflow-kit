@@ -1,11 +1,10 @@
-import type { AppConfig } from "@app/types";
-import { version } from "../package.json";
+import type { AppConfig, ReflowKitInstance } from "@app/types";
 import { DeviceDetector, PageLifecycle, ScrollController, setViewportHeight } from "@app/core";
 import { article, modalBuilder, selectInput } from "@app/features";
 import { utils } from "./shared";
 import { defineProperty } from "@app/helpers";
 
-function init(options: AppConfig = {}) {
+function init(options: AppConfig = {}): ReflowKitInstance {
     setViewportHeight();
 
     const { isMobile, isTablet, isDesktop } = DeviceDetector(options.devices || {});
@@ -50,10 +49,9 @@ function init(options: AppConfig = {}) {
     };
 
     defineProperty(instance, "_developer", "t.me/drmc0de");
-    defineProperty(instance, "_version", version);
+    defineProperty(instance, "_version", __REFLOW_VERSION__);
 
     return instance;
 }
 
-window.ReflowKit = { init };
 export { init };

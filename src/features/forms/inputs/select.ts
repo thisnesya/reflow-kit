@@ -1,4 +1,4 @@
-export function selectInput() {
+export function selectInput(): SelectInput {
     function build(node: HTMLElement, onChange?: (input: HTMLInputElement) => void) {
         const seleted = node.querySelector("[data-value]");
         const toggle = node.querySelector("[data-toggle]");
@@ -28,4 +28,8 @@ export function selectInput() {
     }
 
     return { build };
+}
+
+export interface SelectInput {
+    build(node: HTMLElement, onChange?: (input: HTMLInputElement) => void): void;
 }

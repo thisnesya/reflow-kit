@@ -1,4 +1,4 @@
-export function article() {
+export function article(): Article {
     function render({ richtext, renderFunctions, container }: RenderArticleOptions) {
         const tags = Object.keys(renderFunctions);
         const processedHtml = removeWrappingPTags(richtext.innerHTML, tags);
@@ -59,7 +59,7 @@ export function article() {
     return { render };
 }
 
-type RenderArticleOptions = {
+export type RenderArticleOptions = {
     richtext: HTMLElement;
     container: HTMLElement;
     renderFunctions: {
@@ -68,3 +68,7 @@ type RenderArticleOptions = {
 };
 
 export type RenderFunction = (node: HTMLElement, children: Node[]) => HTMLElement | Node;
+
+export interface Article {
+    render(options: RenderArticleOptions): HTMLElement;
+}

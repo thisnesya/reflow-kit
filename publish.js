@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync } from "child_process";
+import { readFileSync, writeFileSync } from "fs";
 
 // Получаем тег из аргументов (первый аргумент после имени скрипта)
 const tag = process.argv[2];
@@ -19,11 +20,21 @@ if (!tag.startsWith("v")) {
 console.log(`🚀 Starting release process for tag: ${tag}`);
 
 try {
-    // 1. Сборка
+    // 1. Версия из тега -> package.json (её же вшивает сборка в бандл)
+    const version = tag.replace(/^v/, "");
+    const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+
+    if (pkg.version !== version) {
+        console.log(`🔖 Bumping version ${pkg.version} -> ${version}`);
+        pkg.version = version;
+        writeFileSync("package.json", `${JSON.stringify(pkg, null, 4)}\n`);
+    }
+
+    // 2. Сборка
     console.log("📦 Building...");
     execSync("pnpm build", { stdio: "inherit" });
 
-    // 2. Коммит и пуш изменений
+    // 3. Коммит и пуш изменений
     console.log("📝 Committing changes...");
     execSync("git add .", { stdio: "inherit" });
 
@@ -35,12 +46,12 @@ try {
 
     execSync("git push", { stdio: "inherit" });
 
-    // 3. Создание и пуш тега
+    // 4. Создание и пуш тега
     console.log(`🏷️  Creating tag ${tag}...`);
     execSync(`git tag -a "${tag}" -m "${tag}"`, { stdio: "inherit" });
     execSync(`git push origin "${tag}"`, { stdio: "inherit" });
 
-    // 4. Создание релиза
+    // 5. Создание релиза
     console.log(`🎉 Creating release ${tag}...`);
     execSync(`gh release create "${tag}" --generate-notes --title "${tag}"`, { stdio: "inherit" });
 

@@ -191,11 +191,12 @@ type EventsMap<TUtilities = Record<string, unknown>> = {
 export interface PageLifecycleOptions<
     TUtilities = Record<string, unknown>
 > extends PageLifecycleBaseOptions {
+    /** Provided by `init`, not by the caller. */
+    scroll: Lenis;
     utilities?: TUtilities;
 }
 
 export interface PageLifecycleBaseOptions {
-    scroll: Lenis;
     onInit?: () => void;
     lockScrollUntilReady?: boolean;
     triggerPageLeave?: boolean | { condition?: () => boolean };

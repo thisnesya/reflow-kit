@@ -1,6 +1,6 @@
 import type Lenis from "lenis";
 
-export function modalBuilder(scrollController?: Lenis) {
+export function modalBuilder(scrollController?: Lenis): ModalBuilder {
     const modals = new Map<string, Modal>();
     let idx = 0;
 
@@ -83,7 +83,7 @@ export function modalBuilder(scrollController?: Lenis) {
     };
 }
 
-type ModalOptions = {
+export type ModalOptions = {
     name?: string;
     animationDuration?: number;
     onInit?: () => void;
@@ -93,8 +93,14 @@ type ModalOptions = {
     onCloseComplete?: () => void;
 };
 
-type Modal = {
+export type Modal = {
     open: () => void;
     close: () => void;
     isOpen: () => boolean;
 };
+
+export interface ModalBuilder {
+    build(node: HTMLElement, options?: ModalOptions): Modal;
+    get(name: string): Modal | undefined;
+    getAll(): Record<string, Modal>;
+}

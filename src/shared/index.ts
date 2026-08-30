@@ -1,10 +1,12 @@
 import { getFormData } from "@app/features";
 import {
     debounce,
+    deleteQueryParam,
     getQueryParam,
     getQueryParams,
     getUtmQueries,
     nthElement,
+    setQueryParam,
     sleep,
     toArray
 } from "./utils";
@@ -24,6 +26,8 @@ const utils = {
     getQueryParam,
     getQueryParams,
     getUtmQueries,
+    setQueryParam,
+    deleteQueryParam,
     getTemplate,
     setCssProperty,
     onClassChange,
