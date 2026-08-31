@@ -1,6 +1,9 @@
 type Callback = () => void;
 
-const observedNodes = new Map<HTMLElement, { prevClass: Set<string>; callbacks: Set<Callback> }>();
+const observedNodes = new WeakMap<
+    HTMLElement,
+    { prevClass: Set<string>; callbacks: Set<Callback> }
+>();
 
 let observer: MutationObserver | null = null;
 
@@ -43,6 +46,10 @@ export function onClassChange(node: HTMLElement, callback: Callback) {
     return {
         off() {
             entry.callbacks.delete(callback);
+            if (entry.callbacks.size === 0) {
+                getObserver().takeRecords();
+                observedNodes.delete(node);
+            }
         }
     };
 }

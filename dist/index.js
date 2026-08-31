@@ -1,22 +1,22 @@
 // src/core/device/detector.ts
 function DeviceDetector({ mobile, tablet, desktop }) {
+  const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+  const tabletRegex = /(iPad|Tablet|(Android(?!.*Mobile))|SM-T\d{3}|Kindle|Surface|PlayBook|Nexus (7|10)|Tab)/i;
+  const desktopRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Tablet|Kindle|Surface|PlayBook|Nexus (7|10)|Tab/i;
+  const mobileMM = window.matchMedia(`(max-width: ${mobile?.max || 479}px)`);
+  const tabletMM = window.matchMedia(
+    `(min-width: ${tablet?.min || 768}px) and (max-width: ${tablet?.max || 991}px)`
+  );
+  const desktopMM = window.matchMedia(`(min-width: ${desktop?.min || 1025}px)`);
   return {
     isMobile() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      ) || window.matchMedia(`(max-width: ${mobile?.max || 479}px)`).matches;
+      return mobileRegex.test(navigator.userAgent) || mobileMM.matches;
     },
     isTablet() {
-      return /(iPad|Tablet|(Android(?!.*Mobile))|SM-T\d{3}|Kindle|Surface|PlayBook|Nexus (7|10)|Tab)/i.test(
-        navigator.userAgent
-      ) || window.matchMedia(
-        `(min-width: ${tablet?.min || 768}px) and (max-width: ${tablet?.max || 991}px)`
-      ).matches;
+      return tabletRegex.test(navigator.userAgent) || tabletMM.matches;
     },
     isDesktop() {
-      return !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Tablet|Kindle|Surface|PlayBook|Nexus (7|10)|Tab/i.test(
-        navigator.userAgent
-      ) && window.matchMedia(`(min-width: ${desktop?.min || 1025}px)`).matches;
+      return !desktopRegex.test(navigator.userAgent) && desktopMM.matches;
     }
   };
 }
@@ -41,9 +41,9 @@ function PageLifecycle({
     "page:leave": noop,
     "page:load": noop
   };
-  const domReady = new Promise((resolve) => {
-    document.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
-  });
+  const domReady = document.readyState === "loading" ? new Promise(
+    (r) => document.addEventListener("DOMContentLoaded", () => r(), { once: true })
+  ) : Promise.resolve();
   if (lockScrollUntilReady) {
     scroll.stop();
     init2().then(() => scroll.start());
@@ -53,11 +53,15 @@ function PageLifecycle({
   async function init2() {
     onInit?.();
     window.addEventListener("load", () => triggerEvent("page:load"));
-    await triggerEvent("page:before");
-    await document.fonts.ready;
-    await triggerEvent("page:fontready");
+    const fontsReady = Promise.race([
+      document.fonts.ready,
+      new Promise((r) => setTimeout(r, 1500))
+    ]);
     await domReady;
+    await triggerEvent("page:before");
     await Promise.all(domListeners.map(runDomListener));
+    await triggerEvent("page:ready");
+    fontsReady.then(() => triggerEvent("page:fontready"));
     await triggerEvent("page:ready");
     console.log("page:%c ready", "color:green;");
   }
@@ -139,7 +143,11 @@ function PageLifecycle({
 import Lenis from "lenis";
 function ScrollController({ lenis, useScrollTrigger } = {}) {
   const style = document.createElement("style");
-  const instance = new Lenis(lenis || { lerp: 0, autoRaf: useScrollTrigger ? false : true });
+  const instance = new Lenis({
+    lerp: 0,
+    ...lenis,
+    autoRaf: useScrollTrigger ? false : lenis?.autoRaf ?? true
+  });
   if (useScrollTrigger) {
     if (typeof window.ScrollTrigger !== "undefined") gsap();
     else document.addEventListener("DOMContentLoaded", gsap);
@@ -186,11 +194,11 @@ function getAttribute(node, name) {
 // src/shared/dom/template.ts
 function getTemplate(id) {
   const t = document.getElementById(`template_${id}`) || document.getElementById(id);
-  return t && t.tagName === "TEMPLATE" ? t.content.firstChild?.cloneNode(true) : null;
+  return t && t.tagName === "TEMPLATE" ? t.content.firstElementChild?.cloneNode(true) : null;
 }
 
 // src/shared/dom/on-class-change.ts
-var observedNodes = /* @__PURE__ */ new Map();
+var observedNodes = /* @__PURE__ */ new WeakMap();
 var observer = null;
 function getObserver() {
   return observer ?? (observer = new MutationObserver((list) => {
@@ -223,6 +231,10 @@ function onClassChange(node, callback) {
   return {
     off() {
       entry.callbacks.delete(callback);
+      if (entry.callbacks.size === 0) {
+        getObserver().takeRecords();
+        observedNodes.delete(node);
+      }
     }
   };
 }
@@ -566,7 +578,7 @@ function init(options = {}) {
     content: {}
   };
   defineProperty(instance, "_developer", "t.me/drmc0de");
-  defineProperty(instance, "_version", "1.1.1");
+  defineProperty(instance, "_version", "1.1.2");
   return instance;
 }
 export {

@@ -19,9 +19,12 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         "page:load": noop
     };
 
-    const domReady = new Promise<void>(resolve => {
-        document.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
-    });
+    const domReady =
+        document.readyState === "loading"
+            ? new Promise<void>(r =>
+                  document.addEventListener("DOMContentLoaded", () => r(), { once: true })
+              )
+            : Promise.resolve();
 
     if (lockScrollUntilReady) {
         scroll.stop();
@@ -35,13 +38,17 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
 
         window.addEventListener("load", () => triggerEvent("page:load"));
 
-        await triggerEvent("page:before");
-
-        await document.fonts.ready;
-        await triggerEvent("page:fontready");
+        const fontsReady = Promise.race([
+            document.fonts.ready,
+            new Promise(r => setTimeout(r, 1500))
+        ]);
 
         await domReady;
+        await triggerEvent("page:before");
         await Promise.all(domListeners.map(runDomListener));
+        await triggerEvent("page:ready");
+
+        fontsReady.then(() => triggerEvent("page:fontready"));
 
         await triggerEvent("page:ready");
         console.log("page:%c ready", "color:green;");

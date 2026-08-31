@@ -3,7 +3,11 @@ import Lenis from "lenis";
 
 export function ScrollController({ lenis, useScrollTrigger }: ScrollControllerOptions = {}) {
     const style = document.createElement("style");
-    const instance = new Lenis(lenis || { lerp: 0, autoRaf: useScrollTrigger ? false : true });
+    const instance = new Lenis({
+        lerp: 0,
+        ...lenis,
+        autoRaf: useScrollTrigger ? false : (lenis?.autoRaf ?? true)
+    });
 
     if (useScrollTrigger) {
         if (typeof window.ScrollTrigger !== "undefined") gsap();
