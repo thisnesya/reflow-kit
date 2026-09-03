@@ -1,6 +1,6 @@
 {
     "name": "@reflow/kit",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "description": "A lightweight utility kit for building Webflow sites with smooth scrolling, page lifecycle management, and common UI components.",
     "type": "module",
     "main": "./dist/index.cjs",

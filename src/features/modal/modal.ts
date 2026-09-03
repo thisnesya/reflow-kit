@@ -13,7 +13,8 @@ export function modalBuilder(scrollController?: Lenis): ModalBuilder {
             onClose,
             onOpenComplete,
             onCloseComplete,
-            animationDuration = 500
+            animationDuration = 500,
+            hideOnClose = true
         }: ModalOptions = {}
     ): Modal {
         idx++;
@@ -46,10 +47,15 @@ export function modalBuilder(scrollController?: Lenis): ModalBuilder {
 
             document.addEventListener("keyup", listenEscape);
 
-            document.body.classList.add("modal-opened");
-            node.classList.add("is-open");
+            if (hideOnClose) node.classList.remove("u-hidden");
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    node.classList.add("is-open");
+                    document.body.classList.add("modal-opened");
 
-            onOpen && onOpen();
+                    onOpen && onOpen();
+                });
+            });
 
             setTimeout(() => {
                 onOpenComplete && onOpenComplete();
@@ -68,6 +74,7 @@ export function modalBuilder(scrollController?: Lenis): ModalBuilder {
                 if (scrollController) scrollController.start();
 
                 onCloseComplete && onCloseComplete();
+                if (hideOnClose) node.classList.add("u-hidden");
             }, animationDuration + 5);
         }
 
@@ -86,6 +93,7 @@ export function modalBuilder(scrollController?: Lenis): ModalBuilder {
 export type ModalOptions = {
     name?: string;
     animationDuration?: number;
+    hideOnClose?: boolean;
     onInit?: () => void;
     onOpen?: () => void;
     onClose?: () => void;

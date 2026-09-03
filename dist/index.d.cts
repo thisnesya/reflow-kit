@@ -20,8 +20,8 @@ export interface PageLifecycleMethods<TUtilities = Record<string, unknown>> {
 		name?: string;
 		scope?: string;
 	}): void;
-	refresh(scope?: string): Promise<void>;
-	cleanup(scope?: string, detach?: boolean): Promise<void>;
+	refresh(scope?: string | string[]): Promise<void>;
+	cleanup(scope?: string | string[], detach?: boolean): Promise<void>;
 	emit(event: keyof EventsMap<TUtilities>): Promise<void>;
 }
 type EventListener$1<TUtilities = Record<string, unknown>> = (tools: TUtilities) => void | CleanupFn | Promise<void | CleanupFn>;
@@ -49,6 +49,7 @@ export type ScrollControllerOptions = {
 export type ModalOptions = {
 	name?: string;
 	animationDuration?: number;
+	hideOnClose?: boolean;
 	onInit?: () => void;
 	onOpen?: () => void;
 	onClose?: () => void;

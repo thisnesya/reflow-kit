@@ -80,15 +80,23 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
                     eventListeners[event] = cb;
             }
         },
-        async refresh(scope?: string) {
-            const listeners = domListeners.filter(l => (scope ? l.scope === scope : true));
+        async refresh(scope?: string | string[]) {
+            const listeners = domListeners.filter(l => {
+                if (!scope) return true;
+                if (Array.isArray(scope)) return scope.includes(l.scope ?? "");
+                return l.scope === scope;
+            });
 
             await triggerEvent("page:before");
             await Promise.all(listeners.map(runDomListener));
             await triggerEvent("page:ready");
         },
-        async cleanup(scope?: string, detach = true) {
-            const listeners = domListeners.filter(l => (scope ? l.scope === scope : true));
+        async cleanup(scope?: string | string[], detach = true) {
+            const listeners = domListeners.filter(l => {
+                if (!scope) return true;
+                if (Array.isArray(scope)) return scope.includes(l.scope ?? "");
+                return l.scope === scope;
+            });
 
             const cleanups = listeners
                 .map(l => l.cleanup)
@@ -162,8 +170,8 @@ export interface PageLifecycleMethods<TUtilities = Record<string, unknown>> {
         callback: EventsMap<TUtilities>[E],
         options?: { name?: string; scope?: string }
     ): void;
-    refresh(scope?: string): Promise<void>;
-    cleanup(scope?: string, detach?: boolean): Promise<void>;
+    refresh(scope?: string | string[]): Promise<void>;
+    cleanup(scope?: string | string[], detach?: boolean): Promise<void>;
     emit(event: keyof EventsMap<TUtilities>): Promise<void>;
 }
 

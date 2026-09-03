@@ -120,13 +120,21 @@ function PageLifecycle({
       }
     },
     async refresh(scope) {
-      const listeners = domListeners.filter((l) => scope ? l.scope === scope : true);
+      const listeners = domListeners.filter((l) => {
+        if (!scope) return true;
+        if (Array.isArray(scope)) return scope.includes(l.scope ?? "");
+        return l.scope === scope;
+      });
       await triggerEvent("page:before");
       await Promise.all(listeners.map(runDomListener));
       await triggerEvent("page:ready");
     },
     async cleanup(scope, detach = true) {
-      const listeners = domListeners.filter((l) => scope ? l.scope === scope : true);
+      const listeners = domListeners.filter((l) => {
+        if (!scope) return true;
+        if (Array.isArray(scope)) return scope.includes(l.scope ?? "");
+        return l.scope === scope;
+      });
       const cleanups = listeners.map((l) => l.cleanup).filter((fn) => typeof fn === "function");
       await Promise.allSettled(cleanups.map((fn) => fn()));
       if (detach) {
@@ -387,7 +395,8 @@ function modalBuilder(scrollController) {
     onClose,
     onOpenComplete,
     onCloseComplete,
-    animationDuration = 500
+    animationDuration = 500,
+    hideOnClose = true
   } = {}) {
     idx++;
     const closeButtons = node.querySelectorAll('[data-action="close"]');
@@ -410,9 +419,14 @@ function modalBuilder(scrollController) {
     function open() {
       if (scrollController) scrollController.stop();
       document.addEventListener("keyup", listenEscape);
-      document.body.classList.add("modal-opened");
-      node.classList.add("is-open");
-      onOpen && onOpen();
+      if (hideOnClose) node.classList.remove("u-hidden");
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          node.classList.add("is-open");
+          document.body.classList.add("modal-opened");
+          onOpen && onOpen();
+        });
+      });
       setTimeout(() => {
         onOpenComplete && onOpenComplete();
       }, animationDuration + 5);
@@ -425,6 +439,7 @@ function modalBuilder(scrollController) {
       setTimeout(() => {
         if (scrollController) scrollController.start();
         onCloseComplete && onCloseComplete();
+        if (hideOnClose) node.classList.add("u-hidden");
       }, animationDuration + 5);
     }
     function listenEscape(evt) {
@@ -614,7 +629,7 @@ function init(options = {}) {
     content: {}
   };
   defineProperty(instance, "_developer", "t.me/drmc0de");
-  defineProperty(instance, "_version", "1.1.2");
+  defineProperty(instance, "_version", "1.1.3");
   return instance;
 }
 //# sourceMappingURL=index.cjs.map
