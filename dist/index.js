@@ -363,6 +363,7 @@ function modalBuilder(scrollController) {
     hideOnClose = true
   } = {}) {
     idx++;
+    let timer = null;
     const closeButtons = node.querySelectorAll('[data-action="close"]');
     closeButtons.forEach((btn) => btn.addEventListener("click", close));
     onInit && onInit();
@@ -381,9 +382,11 @@ function modalBuilder(scrollController) {
       return node.classList.contains("is-open");
     }
     function open() {
+      if (timer) clearTimeout(timer);
       if (scrollController) scrollController.stop();
       document.addEventListener("keyup", listenEscape);
       if (hideOnClose) node.classList.remove("u-hidden");
+      void node.offsetWidth;
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           node.classList.add("is-open");
@@ -391,16 +394,17 @@ function modalBuilder(scrollController) {
           onOpen && onOpen();
         });
       });
-      setTimeout(() => {
+      timer = setTimeout(() => {
         onOpenComplete && onOpenComplete();
       }, animationDuration + 5);
     }
     function close() {
+      if (timer) clearTimeout(timer);
       document.removeEventListener("keyup", listenEscape);
       node.classList.remove("is-open");
       document.body.classList.remove("modal-opened");
       onClose && onClose();
-      setTimeout(() => {
+      timer = setTimeout(() => {
         if (scrollController) scrollController.start();
         onCloseComplete && onCloseComplete();
         if (hideOnClose) node.classList.add("u-hidden");
@@ -593,7 +597,7 @@ function init(options = {}) {
     content: {}
   };
   defineProperty(instance, "_developer", "t.me/drmc0de");
-  defineProperty(instance, "_version", "1.1.3");
+  defineProperty(instance, "_version", "1.1.4");
   return instance;
 }
 export {

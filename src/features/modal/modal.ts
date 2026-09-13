@@ -18,6 +18,7 @@ export function modalBuilder(scrollController?: Lenis): ModalBuilder {
         }: ModalOptions = {}
     ): Modal {
         idx++;
+        let timer: number | null = null;
 
         const closeButtons = node.querySelectorAll('[data-action="close"]');
 
@@ -43,11 +44,15 @@ export function modalBuilder(scrollController?: Lenis): ModalBuilder {
         }
 
         function open() {
+            if (timer) clearTimeout(timer);
             if (scrollController) scrollController.stop();
 
             document.addEventListener("keyup", listenEscape);
 
             if (hideOnClose) node.classList.remove("u-hidden");
+
+            void node.offsetWidth;
+
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     node.classList.add("is-open");
@@ -57,12 +62,13 @@ export function modalBuilder(scrollController?: Lenis): ModalBuilder {
                 });
             });
 
-            setTimeout(() => {
+            timer = setTimeout(() => {
                 onOpenComplete && onOpenComplete();
             }, animationDuration + 5);
         }
 
         function close() {
+            if (timer) clearTimeout(timer);
             document.removeEventListener("keyup", listenEscape);
 
             node.classList.remove("is-open");
@@ -70,7 +76,7 @@ export function modalBuilder(scrollController?: Lenis): ModalBuilder {
 
             onClose && onClose();
 
-            setTimeout(() => {
+            timer = setTimeout(() => {
                 if (scrollController) scrollController.start();
 
                 onCloseComplete && onCloseComplete();
