@@ -35,7 +35,7 @@ export function selectInput(): SelectInput {
 
         return {
             get isValid() {
-                return isRequired ? isRequired && _value : true;
+                return isRequired ? !!_value : true;
             },
             get value() {
                 return _value;

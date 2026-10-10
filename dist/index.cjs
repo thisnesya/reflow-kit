@@ -534,7 +534,7 @@ function selectInput() {
     });
     return {
       get isValid() {
-        return isRequired ? isRequired && _value : true;
+        return isRequired ? !!_value : true;
       },
       get value() {
         return _value;
@@ -645,7 +645,7 @@ function init(options = {}) {
     content: {}
   };
   defineProperty(instance, "_developer", "t.me/drmc0de");
-  defineProperty(instance, "_version", "1.1.5");
+  defineProperty(instance, "_version", "1.1.6");
   return instance;
 }
 //# sourceMappingURL=index.cjs.map
