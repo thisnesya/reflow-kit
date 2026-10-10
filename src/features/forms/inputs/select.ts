@@ -5,7 +5,10 @@ export function selectInput(): SelectInput {
 
         if (!seleted || !toggle) return;
 
+        const isRequired = node.dataset.required === "true";
         const defaultText = seleted.textContent;
+
+        let _value: string | null = null;
 
         node.querySelectorAll("input").forEach(input => {
             input.addEventListener("change", () => {
@@ -15,6 +18,8 @@ export function selectInput(): SelectInput {
 
                     toggle.classList.add("is-selected", "is-valid");
                     toggle.classList.remove("is-invalid");
+
+                    _value = input.value;
                 }
 
                 onChange?.(input);
@@ -24,7 +29,18 @@ export function selectInput(): SelectInput {
         node.addEventListener("reset", () => {
             seleted.textContent = defaultText;
             toggle.classList.remove("is-invalid", "is-valid", "is-selected");
+
+            _value = null;
         });
+
+        return {
+            get isValid() {
+                return isRequired ? isRequired && _value : true;
+            },
+            get value() {
+                return _value;
+            }
+        };
     }
 
     return { build };
