@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync } from "fs";
 
 // Получаем тег из аргументов (первый аргумент после имени скрипта)
 const tag = process.argv[2];
+const commit = process.argv[3];
 
 if (!tag) {
     console.error("❌ Please specify tag: pnpm release v1.0.5");
@@ -39,7 +40,7 @@ try {
     execSync("git add .", { stdio: "inherit" });
 
     try {
-        execSync(`git commit -m "${tag}"`, { stdio: "inherit" });
+        execSync(`git commit -m "${commit || tag}"`, { stdio: "inherit" });
     } catch (e) {
         console.log("📝 No changes to commit or commit failed, continuing...");
     }

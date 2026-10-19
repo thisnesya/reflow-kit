@@ -56,10 +56,24 @@ export type ModalOptions = {
 	onOpenComplete?: () => void;
 	onCloseComplete?: () => void;
 };
+export type ModalEvents = {
+	open: (modal: Modal) => void;
+	close: (modal: Modal) => void;
+	openComplete: (modal: Modal) => void;
+	closeComplete: (modal: Modal) => void;
+};
 export type Modal = {
+	/** Root element the modal was built from. */
+	readonly element: HTMLElement;
+	readonly name: string;
 	open: () => void;
 	close: () => void;
 	isOpen: () => boolean;
+	/** Add a listener. Returns a function that removes it. */
+	on: <K extends keyof ModalEvents>(event: K, listener: ModalEvents[K]) => () => void;
+	/** Remove a listener, or every listener of `event` when none is given. */
+	off: <K extends keyof ModalEvents>(event: K, listener?: ModalEvents[K]) => void;
+	destroy: () => void;
 };
 export interface ModalBuilder {
 	build(node: HTMLElement, options?: ModalOptions): Modal;
@@ -77,8 +91,30 @@ export type RenderFunction = (node: HTMLElement, children: Node[]) => HTMLElemen
 export interface Article {
 	render(options: RenderArticleOptions): HTMLElement;
 }
+export type SelectInputOptions = {
+	/** Key for `get(name)`. Defaults to the inputs' `name` attribute, then `select-N`. */
+	name?: string;
+	onChange?: (input: HTMLInputElement) => void;
+};
+export type SelectInputEvents = {
+	change: (input: HTMLInputElement, select: SelectInputInstance) => void;
+	reset: (select: SelectInputInstance) => void;
+};
+export type SelectInputInstance = {
+	/** Root element the select was built from. */
+	readonly element: HTMLElement;
+	readonly name: string;
+	readonly isValid: boolean;
+	readonly value: string | null;
+	/** Add a listener. Returns a function that removes it. */
+	on: <K extends keyof SelectInputEvents>(event: K, listener: SelectInputEvents[K]) => () => void;
+	/** Remove a listener, or every listener of `event` when none is given. */
+	off: <K extends keyof SelectInputEvents>(event: K, listener?: SelectInputEvents[K]) => void;
+};
 export interface SelectInput {
-	build(node: HTMLElement, onChange?: (input: HTMLInputElement) => void): void;
+	build(node: HTMLElement, options?: SelectInputOptions | SelectInputOptions["onChange"]): SelectInputInstance | undefined;
+	get(name: string): SelectInputInstance | undefined;
+	getAll(): Record<string, SelectInputInstance>;
 }
 declare function getFormData(node: HTMLFormElement): Data;
 type Data = {

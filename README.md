@@ -277,9 +277,24 @@ modal.isOpen();
 // Destroy modal (cleanup listeners)
 modal.destroy();
 
+// Root element
+modal.element;
+
+// Add / remove listeners after building
+const onOpen = m => console.log("Opened", m.name);
+modal.on("open", onOpen);
+modal.off("open", onOpen);
+
+// `on` also returns an unsubscribe function
+const unsubscribe = modal.on("closeComplete", () => console.log("Closed"));
+unsubscribe();
+
 // Get modal by name
 const contactModal = reflowkit.components.modal.get("contact");
 ```
+
+Events: `open`, `close`, `openComplete`, `closeComplete`. Each listener receives the modal.
+`off(event)` without a listener removes every listener of that event.
 
 `onOpen`/`onClose` fire immediately alongside the state change (no delay).
 `onOpenComplete`/`onCloseComplete` fire after the animation duration elapses.
@@ -305,13 +320,31 @@ const contactModal = reflowkit.components.modal.get("contact");
 Custom dropdown select for Webflow.
 
 ```javascript
-const select = reflowkit.components.selectInput.build(
-    document.querySelector(".custom-select"),
-    input => {
-        console.log("Selected:", input.value);
-    }
-);
+const select = reflowkit.components.selectInput.build(document.querySelector(".custom-select"), {
+    name: "country",
+    onChange: input => console.log("Selected:", input.value)
+});
+
+// Passing the change callback directly still works
+reflowkit.components.selectInput.build(node, input => console.log(input.value));
+
+select.element; // root element
+select.value; // selected value or null
+select.isValid; // false when `data-required="true"` and nothing is selected
+
+// Add / remove listeners after building
+const onChange = (input, select) => console.log(select.name, select.value);
+select.on("change", onChange);
+select.off("change", onChange);
+select.on("reset", select => console.log("Reset", select.name));
+
+// Get selects by name
+reflowkit.components.selectInput.get("country");
+reflowkit.components.selectInput.getAll();
 ```
+
+`name` defaults to the inputs' `name` attribute, then `select-N`.
+`build` returns `undefined` if the element has no `[data-value]` or `[data-toggle]`.
 
 **HTML Structure:**
 

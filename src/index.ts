@@ -18,8 +18,12 @@ export type {
     Article,
     Modal,
     ModalBuilder,
+    ModalEvents,
     ModalOptions,
     RenderArticleOptions,
     RenderFunction,
-    SelectInput
+    SelectInput,
+    SelectInputEvents,
+    SelectInputInstance,
+    SelectInputOptions
 } from "@app/features";

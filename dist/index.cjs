@@ -364,6 +364,28 @@ function updateQuery(mutate, { push }) {
   }
 }
 
+// src/shared/utils/emitter.ts
+function createEmitter() {
+  const listeners = /* @__PURE__ */ new Map();
+  return {
+    on(event, listener) {
+      if (!listeners.has(event)) listeners.set(event, /* @__PURE__ */ new Set());
+      listeners.get(event).add(listener);
+      return () => listeners.get(event)?.delete(listener);
+    },
+    off(event, listener) {
+      if (listener) listeners.get(event)?.delete(listener);
+      else listeners.delete(event);
+    },
+    emit(event, ...args) {
+      listeners.get(event)?.forEach((listener) => listener(...args));
+    },
+    clear() {
+      listeners.clear();
+    }
+  };
+}
+
 // src/core/page/viewport.ts
 function setViewportHeight() {
   const isIos26 = () => {
@@ -400,19 +422,31 @@ function modalBuilder(scrollController) {
   } = {}) {
     idx++;
     let timer = null;
+    const key = name || `modal-${idx}`;
+    const events = createEmitter();
     const closeButtons = node.querySelectorAll('[data-action="close"]');
     closeButtons.forEach((btn) => btn.addEventListener("click", close));
     onInit && onInit();
     const instance = {
+      get element() {
+        return node;
+      },
+      get name() {
+        return key;
+      },
       open,
       close,
       isOpen,
+      on: events.on,
+      off: events.off,
       destroy() {
         closeButtons.forEach((btn) => btn.removeEventListener("click", close));
         close();
+        events.clear();
+        modals.delete(key);
       }
     };
-    modals.set(name || `modal-${idx}`, instance);
+    modals.set(key, instance);
     return instance;
     function isOpen() {
       return node.classList.contains("is-open");
@@ -428,10 +462,12 @@ function modalBuilder(scrollController) {
           node.classList.add("is-open");
           document.body.classList.add("modal-opened");
           onOpen && onOpen();
+          events.emit("open", instance);
         });
       });
       timer = setTimeout(() => {
         onOpenComplete && onOpenComplete();
+        events.emit("openComplete", instance);
       }, animationDuration + 5);
     }
     function close() {
@@ -440,9 +476,11 @@ function modalBuilder(scrollController) {
       node.classList.remove("is-open");
       document.body.classList.remove("modal-opened");
       onClose && onClose();
+      events.emit("close", instance);
       timer = setTimeout(() => {
         if (scrollController) scrollController.start();
         onCloseComplete && onCloseComplete();
+        events.emit("closeComplete", instance);
         if (hideOnClose) node.classList.add("u-hidden");
       }, animationDuration + 5);
     }
@@ -508,14 +546,21 @@ function article() {
 
 // src/features/forms/inputs/select.ts
 function selectInput() {
-  function build(node, onChange) {
+  const selects = /* @__PURE__ */ new Map();
+  let idx = 0;
+  function build(node, options = {}) {
+    const { name, onChange } = typeof options === "function" ? { onChange: options } : options;
     const seleted = node.querySelector("[data-value]");
     const toggle = node.querySelector("[data-toggle]");
     if (!seleted || !toggle) return;
+    idx++;
+    const inputs = node.querySelectorAll("input");
+    const key = name || inputs[0]?.name || `select-${idx}`;
+    const events = createEmitter();
     const isRequired = node.dataset.required === "true";
     const defaultText = seleted.textContent;
     let _value = null;
-    node.querySelectorAll("input").forEach((input) => {
+    inputs.forEach((input) => {
       input.addEventListener("change", () => {
         if (input.checked) {
           seleted.textContent = input.value;
@@ -525,23 +570,39 @@ function selectInput() {
           _value = input.value;
         }
         onChange?.(input);
+        events.emit("change", input, instance);
       });
     });
     node.addEventListener("reset", () => {
       seleted.textContent = defaultText;
       toggle.classList.remove("is-invalid", "is-valid", "is-selected");
       _value = null;
+      events.emit("reset", instance);
     });
-    return {
+    const instance = {
+      get element() {
+        return node;
+      },
+      get name() {
+        return key;
+      },
       get isValid() {
         return isRequired ? !!_value : true;
       },
       get value() {
         return _value;
-      }
+      },
+      on: events.on,
+      off: events.off
     };
+    selects.set(key, instance);
+    return instance;
   }
-  return { build };
+  return {
+    build,
+    get: (name) => selects.get(name),
+    getAll: () => Object.fromEntries(selects)
+  };
 }
 
 // src/features/forms/utils/get-form-data.ts
@@ -645,7 +706,7 @@ function init(options = {}) {
     content: {}
   };
   defineProperty(instance, "_developer", "t.me/drmc0de");
-  defineProperty(instance, "_version", "1.1.6");
+  defineProperty(instance, "_version", "1.2.0");
   return instance;
 }
 //# sourceMappingURL=index.cjs.map
