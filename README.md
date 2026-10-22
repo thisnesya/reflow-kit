@@ -33,6 +33,41 @@ import type { AppConfig, ReflowKitInstance } from "@reflow/kit";
 
 The browser build exposes a single global, `ReflowKit`, with `init` on it.
 
+### Via CDN, non-blocking (`defer` / `async`)
+
+`reflow.kit.async.min.js` doesn't block page rendering. Add a tiny inline stub before it: it
+creates `window.reflowkit` and queues every call made before the kit loads. On load the kit
+initializes itself with the queued `init` options, turns the stub into the real instance and
+replays the queue in order.
+
+```html
+<head>
+    <script>
+        !function(w){var k=w.reflowkit=w.reflowkit||{q:[]};"init on registerUtility refresh cleanup emit ready".split(" ").forEach(function(m){k[m]=k[m]||function(){k.q.push([m,arguments])}})}(window);
+
+        reflowkit.init({ scroll: { useScrollTrigger: true } });
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/gh/thisnesya/reflow-kit@latest/dist/reflow.kit.async.min.js"></script>
+</head>
+<body>
+    <script>
+        // Works anywhere in the page, before or after the kit has loaded
+        reflowkit.registerUtility("hello", () => "hi");
+        reflowkit.on("page:domready", ({ hello }) => console.log(hello()));
+    </script>
+</body>
+```
+
+- Use `reflowkit.init(options)` instead of `ReflowKit.init(options)`, and call it before the kit
+  loads (in the stub). Without it the kit starts with default options.
+- Only `init`, `on`, `registerUtility`, `refresh`, `cleanup`, `emit` and `ready` are queued, and
+  queued calls return nothing. Properties such as `reflowkit.utils` or `reflowkit.components`
+  exist only once the kit has loaded: use them inside lifecycle callbacks or `ready`.
+- `reflowkit.ready(kit => {})` runs as soon as the kit is initialized (right away if it already
+  is), with the instance as argument.
+- Prefer `defer`: it keeps script order and runs before `DOMContentLoaded`. With `async`
+  everything still fires, but `page:domready` may run after the page is already visible.
+
 ## Quick Start
 
 ```javascript

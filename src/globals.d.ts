@@ -9,5 +9,7 @@ declare global {
         gsap: any;
         Webflow: any;
         ReflowKit: any;
+        /** Queue stub, then the instance, in the `defer`/`async` browser build. */
+        reflowkit: any;
     }
 }

@@ -88,7 +88,8 @@ function PageLifecycle({
   }
   async function init2() {
     onInit?.();
-    window.addEventListener("load", () => triggerEvent("page:load"));
+    const loaded = document.readyState === "complete";
+    if (!loaded) window.addEventListener("load", () => triggerEvent("page:load"));
     const fontsReady = Promise.race([
       document.fonts.ready,
       new Promise((r) => setTimeout(r, 1500))
@@ -98,6 +99,7 @@ function PageLifecycle({
     await Promise.all(domListeners.map(runDomListener));
     await triggerEvent("page:ready");
     fontsReady.then(() => triggerEvent("page:fontready"));
+    if (loaded) triggerEvent("page:load");
     await triggerEvent("page:ready");
     console.log("page:%c ready", "color:green;");
   }
@@ -706,7 +708,7 @@ function init(options = {}) {
     content: {}
   };
   defineProperty(instance, "_developer", "t.me/drmc0de");
-  defineProperty(instance, "_version", "1.2.0");
+  defineProperty(instance, "_version", "1.3.0");
   return instance;
 }
 //# sourceMappingURL=index.cjs.map

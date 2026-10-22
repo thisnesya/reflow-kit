@@ -36,7 +36,9 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
     async function init() {
         onInit?.();
 
-        window.addEventListener("load", () => triggerEvent("page:load"));
+        // Loaded with `async`, the script may run after `load` has already fired.
+        const loaded = document.readyState === "complete";
+        if (!loaded) window.addEventListener("load", () => triggerEvent("page:load"));
 
         const fontsReady = Promise.race([
             document.fonts.ready,
@@ -49,6 +51,7 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         await triggerEvent("page:ready");
 
         fontsReady.then(() => triggerEvent("page:fontready"));
+        if (loaded) triggerEvent("page:load");
 
         await triggerEvent("page:ready");
         console.log("page:%c ready", "color:green;");

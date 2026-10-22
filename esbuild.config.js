@@ -22,6 +22,18 @@ await Promise.all([
         minify: true
     }),
 
+    // Browser, `defer`/`async`: inits itself on load and replays calls queued on `window.reflowkit`.
+    esbuild.build({
+        entryPoints: ["src/browser.async.ts"],
+        outfile: "dist/reflow.kit.async.min.js",
+        bundle: true,
+        define,
+        platform: "browser",
+        format: "iife",
+        target: ["es2018"],
+        minify: true
+    }),
+
     // npm: ESM + CJS, dependencies left external so consumers dedupe them.
     esbuild.build({
         entryPoints: ["src/index.ts"],
