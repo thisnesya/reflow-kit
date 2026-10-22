@@ -97,7 +97,6 @@ function PageLifecycle({
     await domReady;
     await triggerEvent("page:before");
     await Promise.all(domListeners.map(runDomListener));
-    await triggerEvent("page:ready");
     fontsReady.then(() => triggerEvent("page:fontready"));
     if (loaded) triggerEvent("page:load");
     await triggerEvent("page:ready");
@@ -708,7 +707,7 @@ function init(options = {}) {
     content: {}
   };
   defineProperty(instance, "_developer", "t.me/drmc0de");
-  defineProperty(instance, "_version", "1.3.0");
+  defineProperty(instance, "_version", "1.3.1");
   return instance;
 }
 //# sourceMappingURL=index.cjs.map

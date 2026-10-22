@@ -48,7 +48,6 @@ export function PageLifecycle<TUtilities = Record<string, unknown>>({
         await domReady;
         await triggerEvent("page:before");
         await Promise.all(domListeners.map(runDomListener));
-        await triggerEvent("page:ready");
 
         fontsReady.then(() => triggerEvent("page:fontready"));
         if (loaded) triggerEvent("page:load");
